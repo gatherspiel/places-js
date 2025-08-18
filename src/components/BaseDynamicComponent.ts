@@ -1,21 +1,27 @@
-import type { DisplayItem } from "../../ui/events/data/types/DisplayItem.ts";
+import type { DisplayItem } from "../../ui/homepage/data/types/DisplayItem.ts";
+
 
 import {
-  createComponentStore,
-  hasComponentStoreSubscribers,
-} from "../store/ComponentStore.ts";
-import {
-  hasRequestStoreSubscribers,
-  initRequestStoresOnLoad,
-} from "../store/RequestStore.ts";
-import { EventHandlerAction } from "../reducer/event/EventHandlerAction.ts";
-import { BaseDispatcher } from "../reducer/BaseDispatcher.ts";
-import { EventReducer } from "../reducer/event/EventReducer.ts";
-import type { EventHandlerReducerConfig } from "../reducer/event/types/EventHandlerReducerConfig.ts";
-import type {
-  ComponentLoadConfig,
-  ReducerFunctionConfig,
+  type ComponentLoadConfig, type DataFieldConfig,
+  GLOBAL_FIELD_SUBSCRIPTIONS_KEY,
+  GLOBAL_STATE_LOAD_CONFIG_KEY,
+  REQUEST_THUNK_REDUCERS_KEY,
+  type RequestThunkReducerConfig,
+  validComponentLoadConfigFields,
 } from "./types/ComponentLoadConfig.ts";
+import type {BaseThunk} from "../state/update/BaseThunk.ts";
+import {
+  getGlobalStateValueIfPresent,
+  subscribeToGlobalField,
+} from "../state/data/GlobalStore.ts";
+import type {FormInputConfig} from "./types/FormInputConfig.ts";
+import  {FormSelector} from "../FormSelector.ts";
+import {getUrlParameter} from "../utils/UrlParamUtils.ts";
+import type {EventHandlerThunkConfig} from "../state/update/event/types/EventHandlerThunkConfig.ts";
+import {BaseDispatcher} from "../state/update/BaseDispatcher.ts";
+import {EventHandlerAction} from "../state/update/event/EventHandlerAction.ts";
+import {EventThunk} from "../state/update/event/EventThunk.ts";
+import type {EventValidationResult} from "../state/update/event/types/EventValidationResult.ts";
 
 type EventConfig = {
   eventType: string;
@@ -23,160 +29,313 @@ type EventConfig = {
 };
 
 export abstract class BaseDynamicComponent extends HTMLElement {
-  componentStoreName?: string;
-  eventHandlers: Record<string, EventConfig>;
-  eventTagIdCount = 0;
 
-  instanceId: number;
 
+  readonly componentId: string
+
+  #dependenciesLoaded: boolean = true;
+  #componentLoadConfig: ComponentLoadConfig;
+
+  #formSelector: FormSelector
+
+  #componentState: any = {};
   static instanceCount = 1;
 
-  //TODO: Consider passing reducers here.
-  constructor(componentStoreName: string, loadConfig?: ComponentLoadConfig) {
+  #eventHandlerConfig:Record<string, EventConfig>;
+  #eventTagIdCount = 0;
+  #elementIdTag:string;
+
+  constructor(loadConfig: ComponentLoadConfig = {}, enablePreload?:boolean) {
     super();
 
-    /*
-    TODO: Remove this warning and make componentStoreName a required property once all instances of BaseDynamicComponent
-    pass a store name in the constructor.
-     */
-    this.instanceId = BaseDynamicComponent.instanceCount;
-    BaseDynamicComponent.instanceCount++;
-    this.eventHandlers = {};
-    if (componentStoreName) {
-      this.componentStoreName = `${componentStoreName}-${BaseDynamicComponent.instanceCount}`;
-      createComponentStore(this.componentStoreName, this);
-    }
+    this.#eventHandlerConfig = {};
+    this.#componentLoadConfig = loadConfig;
 
-    if (loadConfig) {
-      initRequestStoresOnLoad(loadConfig);
-      const componentStoreName = this.componentStoreName;
-      if (!componentStoreName || componentStoreName.length === 0) {
+    BaseDynamicComponent.instanceCount++;
+
+    this.componentId = `${this.constructor.name}-${BaseDynamicComponent.instanceCount}`;
+    this.#formSelector = new FormSelector();
+
+    this.#elementIdTag = `data-${this.componentId}-element-id`;
+
+
+    if(loadConfig.dataFields){
+
+      const self = this;
+      loadConfig.dataFields.forEach((item:DataFieldConfig)=>{
+
+        if(!getGlobalStateValueIfPresent(item.fieldName)){
+          self.#dependenciesLoaded = false;
+        }
+
+        let dataSource:BaseThunk = (enablePreload && item.preloadSource) ? item.preloadSource : item.dataSource;
+
+        let storeReducer = dataSource.globalStateReducer
+        if(!storeReducer){
+          storeReducer = (a:any)=> {
+            return {
+              [item.fieldName]:a
+            }
+          }
+        }
+
+        dataSource.addGlobalStateReducer(storeReducer)
+
+        let params:Record<string, string> = {};
+
+        if(item.urlParams){
+          item.urlParams.forEach(name=>{
+            params[name]=getUrlParameter(name);
+          })
+        }
+
+        dataSource.retrieveData(params);
+      })
+    }
+    const self = this;
+
+    Object.keys(loadConfig).forEach((configField: any) => {
+      if (!validComponentLoadConfigFields.includes(configField)) {
         throw new Error(
-          "Cannot subscribe to reducer. Component store name has not been defined.",
+          `Invalid component load config field ${configField} for ${self.localName}. Valid fields are
+          ${validComponentLoadConfigFields}`,
         );
       }
+    });
 
-      // TODO: Handle case where there are multiple instances of a component that each need different state
-      if (loadConfig.reducerSubscriptions) {
-        loadConfig.reducerSubscriptions.forEach(function (
-          config: ReducerFunctionConfig,
-        ) {
-          config.reducer.subscribeComponent(
-            componentStoreName,
-            config.reducerFunction,
-            config.reducerField,
-          );
-        });
-      }
+    const globalStateLoadConfig = loadConfig[GLOBAL_STATE_LOAD_CONFIG_KEY];
+
+    if (globalStateLoadConfig?.[GLOBAL_FIELD_SUBSCRIPTIONS_KEY]) {
+
+      globalStateLoadConfig[GLOBAL_FIELD_SUBSCRIPTIONS_KEY].forEach(
+        (fieldName: string) => {
+        subscribeToGlobalField(self, fieldName);
+      });
     }
+
+    if (loadConfig[REQUEST_THUNK_REDUCERS_KEY]) {
+
+      loadConfig[REQUEST_THUNK_REDUCERS_KEY].forEach((
+        config: RequestThunkReducerConfig,
+      ) => {
+        if (!config.thunk) {
+          throw new Error(
+            `Missing thunk field in ${self.componentId} reducer configuration`,
+          );
+        }
+        config.thunk.subscribeComponent(
+          this,
+          config?.componentReducer ?? function(data:any){
+            return data
+          },
+          config.reducerField,
+        );
+      });
+    }
+
   }
 
-  updateStore(data: any) {
-    this.eventHandlers = {};
-    this.eventTagIdCount = 0;
+  resetData(){
+    this.#eventHandlerConfig = {};
+    this.#eventTagIdCount = 0;
+  }
 
-    this.generateAndSaveHTML(data);
+  attachEventHandlersToDom(shadowRoot?:any){
+    const eventHandlers = this.#eventHandlerConfig;
+    const elementIdTag = this.#elementIdTag;
 
-    const eventHandlers = this.eventHandlers;
-    const elementIdTag = this.getElementIdTag();
-
-    document.querySelectorAll(`[${elementIdTag}]`).forEach(function (
-      item: Element,
-    ) {
+    const addEventHandler = function (item: Element) {
       const id = item.getAttribute(elementIdTag) ?? "";
       const eventConfig = eventHandlers[id];
       item.addEventListener(eventConfig.eventType, eventConfig.eventFunction);
-    });
+    };
+
+    if (shadowRoot) {
+      shadowRoot?.querySelectorAll(`[${elementIdTag}]`).forEach(
+        (item:any) => {
+          addEventHandler(item);
+        });
+    } else {
+
+      document.querySelectorAll(`[${elementIdTag}]`).forEach( (
+        item: Element,
+      ) => {
+        addEventHandler(item);
+      });
+    }
   }
 
-  generateAndSaveHTML(data: any) {
+  updateWithCustomReducer(data: any,
+                          updateFunction = (data:any)=>data) {
+    if (!data) {
+      data = this.#componentState
+    }
+
+    const updatedData = updateFunction(data);
+    if (!updatedData) {
+      throw new Error(
+        `Update function for  must return a JSON object`,
+      );
+    }
+
+    this.#componentState = {...this.#componentState,...updatedData};
+    this.resetData();
+    this.generateAndSaveHTML(this.#componentState, this.#dependenciesLoaded);
+
+    if(this.shadowRoot){
+      this.#formSelector.setShadowRoot(this.shadowRoot);
+    }
+    this.attachEventHandlersToDom(this.shadowRoot);
+  }
+
+
+  getComponentStore(){
+    return this.#componentState;
+  }
+
+  hasUserEditPermissions(){
+    return this.#componentState?.permissions?.userCanEdit;
+  }
+
+  // @ts-ignore
+  generateAndSaveHTML(data: any, dependenciesLoaded:boolean) {
+    this.#formSelector.clearFormSelectors();
     this.innerHTML = this.render(data);
   }
 
-  getElementIdTag() {
-    return `data-${this.componentStoreName}-element-id`;
+  addShortInput(formConfig:FormInputConfig){
+    return this.#formSelector.generateInputFormSelector(formConfig);
   }
-  //TODO: Handle case where there are multiple instances of the same component when generating the ids for event handlers.
-  saveEventHandler(
-    eventFunction: (e: Event) => any,
-    eventType: string,
-    targetId?: string,
-  ): string {
-    let id = `${this.getElementIdTag()}=${this.eventTagIdCount}`;
 
-    this.eventHandlers[this.eventTagIdCount] = {
+  addTextInput(formConfig:FormInputConfig){
+    return this.#formSelector.generateTextInputFormItem(formConfig);
+  }
+
+
+  createEvent(eventConfig: any, eventType:string, params?:any){
+    const eventHandler = this.createHandler(
+      eventConfig,
+      this.#formSelector,
+      this,
+      params
+    );
+    let eventId = `${this.#elementIdTag}=${this.#eventTagIdCount}`;
+
+    this.#eventHandlerConfig[this.#eventTagIdCount] = {
       eventType: eventType,
-      eventFunction: eventFunction,
+      eventFunction: eventHandler,
     };
-    this.eventTagIdCount++;
-
-    if (targetId) {
-      id += ` id=${targetId}`;
-    }
-    return id;
+    this.#eventTagIdCount++;
+    return eventId;
   }
 
-  createOnChangeEvent(eventConfig: any) {
-    const eventHandler = BaseDynamicComponent.createHandler(
-      eventConfig,
-      this?.componentStoreName,
-    );
-    return this.saveEventHandler(eventHandler, "change");
-  }
-
-  createSubmitEvent(eventConfig: any) {
-    const eventHandler = BaseDynamicComponent.createHandler(
-      eventConfig,
-      this?.componentStoreName,
-    );
-    return this.saveEventHandler(eventHandler, "submit");
-  }
-
-  createClickEvent(eventConfig: any, id?: string) {
-    const eventHandler = BaseDynamicComponent.createHandler(
-      eventConfig,
-      this?.componentStoreName,
-    );
-    return this.saveEventHandler(eventHandler, "click", id);
-  }
-
-  static createHandler(
-    eventConfig: EventHandlerReducerConfig,
-    storeName?: string,
+  createHandler(
+    eventConfig: EventHandlerThunkConfig,
+    formSelector: FormSelector,
+    component: BaseDynamicComponent,
+    params?: any
   ) {
-    const storeToUpdate =
-      eventConfig?.storeToUpdate && eventConfig.storeToUpdate.length > 0
-        ? eventConfig.storeToUpdate
-        : storeName;
-    if (!storeToUpdate) {
-      throw new Error("Event handler must be associated with a valid state");
-    }
 
-    const handler = function (e: Event) {
-      if (
-        !hasRequestStoreSubscribers(storeToUpdate) &&
-        !hasComponentStoreSubscribers(storeToUpdate)
-      ) {
-        throw new Error(`No subscribers for store ${storeToUpdate}`);
-      }
 
-      e.preventDefault();
-      const request: EventHandlerAction = new EventHandlerAction(
-        eventConfig.eventHandler,
-        storeName,
-      );
+    const dispatchers: BaseDispatcher[] = [];
+    let componentStoreUpdate = new BaseDispatcher(
+      component,
+      eventConfig.componentReducer,
+    );
+    dispatchers.push(componentStoreUpdate);
 
-      const storeUpdate = new BaseDispatcher(storeToUpdate, (a: any): any => {
+    const apiRequestThunk = eventConfig.apiRequestThunk;
+    if(apiRequestThunk){
+      const storeUpdate = new BaseDispatcher(apiRequestThunk, (a: any): any => {
         return a;
       });
-      const eventUpdater: EventReducer = new EventReducer(request, [
-        storeUpdate,
-      ]);
-      eventUpdater.processEvent(e);
-    };
+      dispatchers.push(storeUpdate);
+    }
 
+    const request: EventHandlerAction = new EventHandlerAction(
+      eventConfig.eventHandler,
+      component,
+      formSelector,
+      params
+    );
+
+    const eventUpdater: EventThunk = new EventThunk(request, dispatchers);
+
+    const handler = function (e: Event) {
+
+      /**
+       * TODO for refactoring
+       *
+       * -Move EventHandlerAction.retrieveData logic here.
+       * -Update API thunk and component state directly.
+       * -Delete EventHandlerAction.ts
+       * -Delete EventThunk logic here and then try and delete EventThunk class.
+       * -Delete logic related to dispatchers
+       */
+      e.preventDefault();
+
+      const validatorFunction = eventConfig.validator;
+      if (validatorFunction) {
+        const validator = function (): EventValidationResult {
+          const componentData = component.getComponentStore();
+          return validatorFunction(formSelector, componentData);
+        };
+
+        eventUpdater.processEvent(e, validator).then((result: any) => {
+          if (result?.errorMessage) {
+            componentStoreUpdate.updateStore(result);
+          }
+        });
+      } else {
+        eventUpdater.processEvent(e);
+      }
+    };
     return handler;
   }
 
+  updateFromGlobalState(globalStateData:any) {
+
+
+    const globalStateLoadConfig =
+      this.#componentLoadConfig.globalStateLoadConfig;
+    if (!globalStateLoadConfig) {
+      throw new Error(`Component global state config is not defined for component ${this.componentId}`);
+    }
+
+    let reducer =
+      this.#componentLoadConfig.globalStateLoadConfig?.defaultGlobalStateReducer ??
+      ((updates: Record<string, string>) => updates)
+
+
+    let dataLoaded = true;
+
+
+    this.#componentLoadConfig?.dataFields?.forEach((item:DataFieldConfig)=> {
+      if(!(globalStateData[item.fieldName])){
+        dataLoaded = false;
+      }
+    });
+
+    if(dataLoaded){
+      this.#dependenciesLoaded = true;
+    }
+
+    let dataToUpdate: Record<string, string> = {};
+
+    this.#componentLoadConfig.globalStateLoadConfig?.globalFieldSubscriptions?.forEach(
+       (fieldName) => {
+        dataToUpdate[fieldName] = globalStateData[fieldName];
+      },
+    );
+
+    if(this.#dependenciesLoaded){
+      this.updateWithCustomReducer(
+        dataToUpdate,
+        reducer
+      );
+    }
+
+
+  }
   abstract render(data: Record<any, DisplayItem> | any): string;
 }
