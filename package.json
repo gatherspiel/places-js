@@ -4,9 +4,13 @@
   "homepage": "https://github.com/free-gather/places-js#",
   "license": "GPL-3.0",
   "description": "A framework based on Web Components to build interactive UIs for in person event listings",
-  "keywords": ["framework","ui", "state"],
+  "keywords": [
+    "framework",
+    "ui",
+    "state"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/free-gather/places-js"
+    "url": "git+https://github.com/free-gather/places-js.git"
   }
 }
