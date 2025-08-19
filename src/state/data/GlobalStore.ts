@@ -39,6 +39,7 @@ export function updateGlobalStore(fieldsToUpdate: Record<string, any>) {
       globalState[fieldName] !== fieldsToUpdate[fieldName] &&
       fieldName in globalStateSubscribers
     ) {
+      //@ts-ignore
       globalStateSubscribers[fieldName].forEach( (
         component: BaseDynamicComponent,
       ) => {
@@ -68,7 +69,9 @@ export function subscribeToGlobalField(
   if (!(fieldName in globalStateSubscribers)) {
     globalStateSubscribers[fieldName] = [component];
   } else {
+    //@ts-ignore
     if (!globalStateSubscribers[fieldName].includes(component)) {
+      //@ts-ignore
       globalStateSubscribers[fieldName].push(component);
     }
   }

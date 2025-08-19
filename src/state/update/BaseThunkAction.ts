@@ -1,3 +1,5 @@
-export abstract class BaseThunkAction {
-  abstract retrieveData(params: any, cacheKey?: string): any;
+export class BaseThunkAction {
+  retrieveData(params: any, cacheKey?: string):any {
+    return {"status":"Done"}
+  };
 }

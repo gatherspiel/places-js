@@ -1,4 +1,4 @@
-import type { BaseThunk } from "../../state/update/BaseThunk.ts";
+import type BaseThunk from "../../state/update/BaseThunk.ts";
 
 export const REQUEST_THUNK_REDUCERS_KEY  = "requestThunkReducers"
 export const GLOBAL_STATE_LOAD_CONFIG_KEY = "globalStateLoadConfig"
