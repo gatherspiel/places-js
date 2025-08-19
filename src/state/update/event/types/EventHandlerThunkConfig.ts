@@ -1,7 +1,7 @@
-import type { EventHandlerData } from "./EventHandlerData.ts";
-import type { EventValidationResult } from "./EventValidationResult.ts";
-import type {FormSelector} from "../../../../FormSelector.ts";
-import type {BaseThunk} from "../../BaseThunk.ts";
+import type { EventHandlerData } from "./EventHandlerData";
+import type { EventValidationResult } from "./EventValidationResult";
+import type {FormSelector} from "../../../../FormSelector";
+import type {BaseThunk} from "../../BaseThunk";
 
 export interface EventHandlerThunkConfig {
   componentReducer?: (a: any) => any; //Reducer function

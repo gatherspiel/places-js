@@ -1,4 +1,4 @@
-import type {FormSelector} from "../../../../FormSelector.ts";
+import type {FormSelector} from "../../../../FormSelector";
 
 export interface EventHandlerData {
   event?: Event;

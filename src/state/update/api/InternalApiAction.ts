@@ -1,15 +1,15 @@
-import type { DefaultApiAction } from "./DefaultApiAction.ts";
-import { BaseThunkAction } from "../BaseThunkAction.ts";
+import type { DefaultApiAction } from "./DefaultApiAction";
+import { BaseThunkAction } from "../BaseThunkAction";
 
-import type { ApiRequestConfig } from "./types/ApiRequestConfig.ts";
-import { ApiActionTypes } from "./types/ApiActionTypes.ts";
-import {getAccessTokenIfPresent} from "../../../../ui/auth/AuthUtils.ts";
-import {AUTH_TOKEN_HEADER_KEY} from "../../../../ui/auth/Constants.ts";
+import type { ApiRequestConfig } from "./types/ApiRequestConfig";
+import { ApiActionTypes } from "./types/ApiActionTypes";
+import {getAccessTokenIfPresent} from "../../../../ui/auth/AuthUtils";
+import {AUTH_TOKEN_HEADER_KEY} from "../../../../ui/auth/Constants";
 import {
   clearSessionStorage,
   getItemFromSessionStorage,
   updateSessionStorage
-} from "../../data/SessionStorageUtils.ts";
+} from "../../data/SessionStorageUtils";
 export class InternalApiAction extends BaseThunkAction {
   readonly #defaultResponse: DefaultApiAction;
   readonly #getQueryConfig: (a: any) => ApiRequestConfig;

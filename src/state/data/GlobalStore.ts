@@ -1,4 +1,4 @@
-import type { BaseDynamicComponent } from "../../components/BaseDynamicComponent.ts";
+import type { BaseDynamicComponent } from "../../components/BaseDynamicComponent";
 
 let globalState: Record<string, any> = {};
 

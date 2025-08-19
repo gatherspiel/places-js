@@ -1,8 +1,8 @@
-import type { DefaultApiAction } from "./DefaultApiAction.ts";
-import { BaseThunk } from "../BaseThunk.ts";
-import { ExternalApiAction } from "./ExternalApiAction.ts";
-import { InternalApiAction } from "./InternalApiAction.ts";
-import type { ApiRequestConfig } from "./types/ApiRequestConfig.ts";
+import type { DefaultApiAction } from "./DefaultApiAction";
+import { BaseThunk } from "../BaseThunk";
+import { ExternalApiAction } from "./ExternalApiAction";
+import { InternalApiAction } from "./InternalApiAction";
+import type { ApiRequestConfig } from "./types/ApiRequestConfig";
 
 export type ApiThunkConfig = {
   queryConfig: (a: any) => ApiRequestConfig;

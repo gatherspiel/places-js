@@ -1,4 +1,4 @@
-import {BaseThunkAction} from "../BaseThunkAction.ts";
+import {BaseThunkAction} from "../BaseThunkAction";
 
 export class PreloadApiAction extends BaseThunkAction{
 

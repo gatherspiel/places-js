@@ -1,4 +1,4 @@
-import type {DisplayItem} from "./types/DisplayItem.js";
+import type {DisplayItem} from "./types/DisplayItem";
 
 import {
   type ComponentLoadConfig, type DataFieldConfig,
@@ -7,20 +7,20 @@ import {
   REQUEST_THUNK_REDUCERS_KEY,
   type RequestThunkReducerConfig,
   validComponentLoadConfigFields,
-} from "./types/ComponentLoadConfig.ts";
-import type {BaseThunk} from "../state/update/BaseThunk.ts";
+} from "./types/ComponentLoadConfig";
+import type {BaseThunk} from "../state/update/BaseThunk";
 import {
   getGlobalStateValueIfPresent,
   subscribeToGlobalField,
-} from "../state/data/GlobalStore.ts";
-import type {FormInputConfig} from "./types/FormInputConfig.ts";
-import  {FormSelector} from "../FormSelector.ts";
-import {getUrlParameter} from "../utils/UrlParamUtils.ts";
-import type {EventHandlerThunkConfig} from "../state/update/event/types/EventHandlerThunkConfig.ts";
-import {BaseDispatcher} from "../state/update/BaseDispatcher.ts";
-import {EventHandlerAction} from "../state/update/event/EventHandlerAction.ts";
-import {EventThunk} from "../state/update/event/EventThunk.ts";
-import type {EventValidationResult} from "../state/update/event/types/EventValidationResult.ts";
+} from "../state/data/GlobalStore";
+import type {FormInputConfig} from "./types/FormInputConfig";
+import  {FormSelector} from "../FormSelector";
+import {getUrlParameter} from "../utils/UrlParamUtils";
+import type {EventHandlerThunkConfig} from "../state/update/event/types/EventHandlerThunkConfig";
+import {BaseDispatcher} from "../state/update/BaseDispatcher";
+import {EventHandlerAction} from "../state/update/event/EventHandlerAction";
+import {EventThunk} from "../state/update/event/EventThunk";
+import type {EventValidationResult} from "../state/update/event/types/EventValidationResult";
 
 type EventConfig = {
   eventType: string;
@@ -268,7 +268,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
        *
        * -Move EventHandlerAction.retrieveData logic here.
        * -Update API thunk and component state directly.
-       * -Delete EventHandlerAction.ts
+       * -Delete EventHandlerAction
        * -Delete EventThunk logic here and then try and delete EventThunk class.
        * -Delete logic related to dispatchers
        */

@@ -1,9 +1,9 @@
-import { BaseThunkAction } from "./BaseThunkAction.ts";
-import { BaseDispatcher } from "./BaseDispatcher.ts";
+import { BaseThunkAction } from "./BaseThunkAction";
+import { BaseDispatcher } from "./BaseDispatcher";
 
-import {updateGlobalStore} from "../data/GlobalStore.ts";
+import {updateGlobalStore} from "../data/GlobalStore";
 
-import type {BaseDynamicComponent} from "../../components/BaseDynamicComponent.ts";
+import type {BaseDynamicComponent} from "../../components/BaseDynamicComponent";
 
 export class BaseThunk {
   thunkAction: BaseThunkAction;

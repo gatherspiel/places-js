@@ -1,10 +1,10 @@
 
-import { getComponent } from "../../shared/components/ComponentRegistry.ts";
-import { setupStateFields} from "../../shared/InitGlobalStateConfig.ts";
-import {PageState} from "./PageState.ts";
 
-import type {BaseDynamicComponent} from "../components/BaseDynamicComponent.ts";
-import {clearGlobalStore} from "../state/data/GlobalStore.ts";
+import {getComponent} from "../components/ComponentRegistry";
+import {PageState} from "./PageState";
+
+import type {BaseDynamicComponent} from "../components/BaseDynamicComponent";
+import {clearGlobalStore} from "../state/data/GlobalStore";
 
 
 export abstract class AbstractPageComponent extends HTMLElement {
@@ -16,7 +16,6 @@ export abstract class AbstractPageComponent extends HTMLElement {
   constructor() {
     super();
 
-    setupStateFields();
     const componentName: string = this.getAttribute("componentName") ?? "";
 
     const self = this;

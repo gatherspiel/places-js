@@ -1,4 +1,4 @@
-import { BaseDynamicComponent } from "./BaseDynamicComponent.ts";
+import { BaseDynamicComponent } from "./BaseDynamicComponent";
 
 export abstract class BaseTemplateDynamicComponent extends BaseDynamicComponent {
   override generateAndSaveHTML(data: any, dependenciesLoaded:boolean) {

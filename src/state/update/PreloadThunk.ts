@@ -1,5 +1,5 @@
-import {BaseThunk} from "./BaseThunk.ts";
-import {PreloadApiAction} from "./api/PreloadApiAction.ts";
+import {BaseThunk} from "./BaseThunk";
+import {PreloadApiAction} from "./api/PreloadApiAction";
 
 export class PreloadThunk extends BaseThunk {
 

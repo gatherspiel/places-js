@@ -1,5 +1,5 @@
-import type {FormSelector} from "../../../FormSelector.ts";
-import type {BaseDynamicComponent} from "../../../components/BaseDynamicComponent.ts";
+import type {FormSelector} from "../../../FormSelector";
+import type {BaseDynamicComponent} from "../../../components/BaseDynamicComponent";
 
 export class EventHandlerAction {
   #eventHandler: (a: any, componentStore?: any) => any;

@@ -1,5 +1,5 @@
-import { BaseThunkAction } from "../BaseThunkAction.ts";
-import type { DefaultApiAction } from "./DefaultApiAction.ts";
+import { BaseThunkAction } from "../BaseThunkAction";
+import type { DefaultApiAction } from "./DefaultApiAction";
 
 export class ExternalApiAction extends BaseThunkAction {
 
