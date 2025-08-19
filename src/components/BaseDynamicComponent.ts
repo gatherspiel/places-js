@@ -8,7 +8,7 @@ import {
   type RequestThunkReducerConfig,
   validComponentLoadConfigFields,
 } from "./types/ComponentLoadConfig.ts";
-import type BaseThunk from "../state/update/BaseThunk.ts";
+import type {BaseThunk} from "../state/update/BaseThunk.ts";
 import {
   getGlobalStateValueIfPresent,
   subscribeToGlobalField,

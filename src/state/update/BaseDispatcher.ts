@@ -2,7 +2,7 @@
  Updates store after an API response is returned
  */
 import type {BaseDynamicComponent} from "../../components/BaseDynamicComponent.ts";
-import BaseThunk from "./BaseThunk.ts";
+import {BaseThunk} from "./BaseThunk.ts";
 
 export class BaseDispatcher {
   storeField: BaseThunk | BaseDynamicComponent;

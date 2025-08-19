@@ -1,4 +1,4 @@
-import BaseThunk from "../BaseThunk.ts";
+import {BaseThunk} from "../BaseThunk.ts";
 import type { BaseDispatcher } from "../BaseDispatcher.ts";
 import { EventHandlerAction } from "./EventHandlerAction.ts";
 import type { EventValidationResult } from "./types/EventValidationResult.ts";
