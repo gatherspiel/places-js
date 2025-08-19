@@ -1,5 +1,5 @@
 import type {FormInputConfig} from "./components/types/FormInputConfig.ts";
-import {COMPONENT_LABEL_KEY} from "../shared/Constants.ts";
+import {COMPONENT_LABEL_KEY} from "./Constants.ts";
 
 export class FormSelector {
 

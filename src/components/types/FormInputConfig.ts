@@ -1,4 +1,4 @@
-import {COMPONENT_LABEL_KEY} from "../../../shared/Constants.ts";
+import {COMPONENT_LABEL_KEY} from "../../Constants.js";
 
 export type FormInputConfig = {
   [COMPONENT_LABEL_KEY]: string,

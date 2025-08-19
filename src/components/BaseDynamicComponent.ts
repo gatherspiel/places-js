@@ -1,5 +1,4 @@
-import type { DisplayItem } from "../../ui/homepage/data/types/DisplayItem.ts";
-
+import type {DisplayItem} from "./types/DisplayItem.js";
 
 import {
   type ComponentLoadConfig, type DataFieldConfig,
@@ -147,6 +146,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     const addEventHandler = function (item: Element) {
       const id = item.getAttribute(elementIdTag) ?? "";
       const eventConfig = eventHandlers[id];
+      // @ts-ignore
       item.addEventListener(eventConfig.eventType, eventConfig.eventFunction);
     };
 
