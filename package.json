@@ -1,6 +1,6 @@
 {
   "name": "@bponnaluri/places-js",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "homepage": "https://github.com/free-gather/places-js#",
   "license": "GPL-3.0",
   "description": "A framework based on Web Components to build interactive UIs for in person event listings",
@@ -10,15 +10,15 @@
     "ui",
     "state"
   ],
-  "main": "dist/random-js.umd.js",
-  "module": "dist/random-js.esm.js",
-  "unpkg": "dist/random-js.umd.min.js",
+  "main": "dist/places-js.umd.js",
+  "module": "dist/places-js.esm.js",
+  "unpkg": "dist/places-js.umd.min.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c rollup.config.js --format esm --sourcemap true -o dist/random-js.esm.js"
+    "build": "rollup -c rollup.config.js --format esm --sourcemap true -o dist/places-js.esm.js"
   },
   "repository": {
     "type": "git",
