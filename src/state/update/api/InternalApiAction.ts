@@ -3,8 +3,7 @@ import { BaseThunkAction } from "../BaseThunkAction";
 
 import type { ApiRequestConfig } from "./types/ApiRequestConfig";
 import { ApiActionTypes } from "./types/ApiActionTypes";
-import {getAccessTokenIfPresent} from "../../../../ui/auth/AuthUtils";
-import {AUTH_TOKEN_HEADER_KEY} from "../../../../ui/auth/Constants";
+import {getAccessTokenIfPresent} from "../../../utils/AuthUtils";
 import {
   clearSessionStorage,
   getItemFromSessionStorage,
@@ -47,7 +46,7 @@ export class InternalApiAction extends BaseThunkAction {
     }
 
     if (authData && queryConfig.headers) {
-      queryConfig.headers[AUTH_TOKEN_HEADER_KEY] = authData;
+      queryConfig.headers["authToken"] = authData;
     }
 
     const response = await this.#getResponseData(

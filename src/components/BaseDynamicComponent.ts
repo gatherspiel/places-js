@@ -165,8 +165,8 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     }
   }
 
-  updateWithCustomReducer(data: any,
-                          updateFunction = (data:any)=>data) {
+  retrieveData(data: any,
+               updateFunction = (data:any)=>data) {
     if (!data) {
       data = this.#componentState
     }
@@ -329,7 +329,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     );
 
     if(this.#dependenciesLoaded){
-      this.updateWithCustomReducer(
+      this.retrieveData(
         dataToUpdate,
         reducer
       );
