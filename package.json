@@ -1,6 +1,6 @@
 {
   "name": "@bponnaluri/places-js",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "homepage": "https://github.com/free-gather/places-js#",
   "license": "GPL-3.0",
   "description": "A framework based on Web Components to build interactive UIs for in person event listings",
@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/gatherspiel/places-js"
+    "url": "git+https://github.com/gatherspiel/places-js.git"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
