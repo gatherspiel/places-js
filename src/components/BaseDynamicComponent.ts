@@ -21,6 +21,7 @@ import {BaseDispatcher} from "../state/update/BaseDispatcher";
 import {EventHandlerAction} from "../state/update/event/EventHandlerAction";
 import {EventThunk} from "../state/update/event/EventThunk";
 import type {EventValidationResult} from "../state/update/event/types/EventValidationResult";
+import {freezeState} from "../utils/Immutable";
 
 type EventConfig = {
   eventType: string;
@@ -165,15 +166,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     }
   }
 
-  #freezeState(state:any){
-    for (let [key, value] of Object.entries(state)) {
-      if (state.hasOwnProperty(key) && typeof value == "object") {
-        this.#freezeState(value);
-      }
-    }
-    Object.freeze(state);
-    return state;
-  }
 
   retrieveData(data: any,
                updateFunction = (data:any)=>data) {
@@ -188,7 +180,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       );
     }
 
-    this.#componentState = {...this.#componentState,...this.#freezeState(updatedData)};
+    this.#componentState = {...this.#componentState,...freezeState(updatedData)};
     this.resetData();
     this.generateAndSaveHTML(this.#componentState, this.#dependenciesLoaded);
 
@@ -214,7 +206,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   }
 
   addShortInput(formConfig:FormInputConfig){
-    return this.#formSelector.generateInputFormSelector(formConfig);
+    return this.#formSelector.generateInputFormSelector(formConfig, this);
   }
 
   addTextInput(formConfig:FormInputConfig){

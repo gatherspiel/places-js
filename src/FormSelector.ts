@@ -1,5 +1,6 @@
 import type {FormInputConfig} from "./components/types/FormInputConfig";
 import {COMPONENT_LABEL_KEY} from "./Constants";
+import {BaseDynamicComponent} from "./components/BaseDynamicComponent";
 
 export class FormSelector {
 
@@ -31,24 +32,29 @@ export class FormSelector {
 
   }
 
-  generateInputFormSelector(formConfig:FormInputConfig){
+  generateInputFormSelector(formConfig:FormInputConfig, component:BaseDynamicComponent){
     let formValue = formConfig.value;
     if(!formValue && this.formSelectors.has(formConfig.id)){
       formValue = this.getValue(formConfig.id);
     }
+    console.log(formConfig.lineBreakAfterLabel)
 
     this.formSelectors.add(formConfig.id);
     return `
-      <label for=${formConfig.id}>${formConfig[COMPONENT_LABEL_KEY]}</label>
-      ${formConfig.lineBreakAfterLabel !== false? `<br>` : ''}
+      ${formConfig[COMPONENT_LABEL_KEY] ? 
+        `<label for=${formConfig.id}>${formConfig[COMPONENT_LABEL_KEY]}</label>
+         ${formConfig.lineBreakAfterLabel !== false? `<br>` : ''}
+
+        `
+      : ``}
       <input
+        ${formConfig.eventConfig ? component.createEvent(formConfig.eventConfig,"change") : ''}
         ${formConfig.className ? `class="${formConfig.className}"` : ``}
         id=${formConfig.id}
         name=${formConfig.id}
         type=${formConfig.inputType}
         value="${formValue}"
         />
-        <br>
     `
   }
 
