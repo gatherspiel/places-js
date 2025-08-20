@@ -29,12 +29,6 @@ export function updateGlobalStore(fieldsToUpdate: Record<string, any>) {
 
   let componentsToUpdate = new Set();
   Object.keys(fieldsToUpdate).forEach((fieldName: string)=> {
-    if (!(fieldName in globalState)) {
-      throw new Error(
-        `Invalid field ${fieldName} for global store. Make sure field is configured as a field name using setupGlobalState`,
-      );
-    }
-
     if (
       globalState[fieldName] !== fieldsToUpdate[fieldName] &&
       fieldName in globalStateSubscribers
@@ -51,7 +45,7 @@ export function updateGlobalStore(fieldsToUpdate: Record<string, any>) {
   });
 
   componentsToUpdate.forEach( (component: any) =>{
-    component.updateFromGlobalState(structuredClone(globalState));
+    component.updateFromGlobalState((structuredClone(globalState)));
   });
 }
 
@@ -59,12 +53,7 @@ export function subscribeToGlobalField(
   component: BaseDynamicComponent,
   fieldName: string,
 ) {
-  if (!(fieldName in globalState)) {
-    throw new Error(
-      `Component id: ${component.componentId} cannot subscribe to field ${fieldName}.
-       Make sure the field is configured as a field name using setupGlobalState`,
-    );
-  }
+
 
   if (!(fieldName in globalStateSubscribers)) {
     globalStateSubscribers[fieldName] = [component];

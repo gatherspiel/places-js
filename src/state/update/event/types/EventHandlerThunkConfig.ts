@@ -6,7 +6,7 @@ import type {BaseThunk} from "../../BaseThunk";
 export interface EventHandlerThunkConfig {
   componentReducer?: (a: any) => any; //Reducer function
   eventHandler: (e: EventHandlerData) => any;
-  requestStoreToUpdate?: string;
+  globalStoreReducer?:(a:any)=>any;
   validator?: (
     formSelector: FormSelector,
     componentData: any) => EventValidationResult;

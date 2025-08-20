@@ -165,6 +165,16 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     }
   }
 
+  #freezeState(state:any){
+    for (let [key, value] of Object.entries(state)) {
+      if (state.hasOwnProperty(key) && typeof value == "object") {
+        this.#freezeState(value);
+      }
+    }
+    Object.freeze(state);
+    return state;
+  }
+
   retrieveData(data: any,
                updateFunction = (data:any)=>data) {
     if (!data) {
@@ -178,7 +188,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       );
     }
 
-    this.#componentState = {...this.#componentState,...updatedData};
+    this.#componentState = {...this.#componentState,...this.#freezeState(updatedData)};
     this.resetData();
     this.generateAndSaveHTML(this.#componentState, this.#dependenciesLoaded);
 
@@ -238,11 +248,14 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
 
     const dispatchers: BaseDispatcher[] = [];
-    let componentStoreUpdate = new BaseDispatcher(
-      component,
-      eventConfig.componentReducer,
-    );
-    dispatchers.push(componentStoreUpdate);
+
+    if(eventConfig.componentReducer){
+      dispatchers.push(new BaseDispatcher(
+        component,
+        eventConfig.componentReducer,
+      ));
+
+    }
 
     const apiRequestThunk = eventConfig.apiRequestThunk;
     if(apiRequestThunk){
@@ -260,6 +273,10 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     );
 
     const eventUpdater: EventThunk = new EventThunk(request, dispatchers);
+
+    if(eventConfig.globalStoreReducer){
+      eventUpdater.addGlobalStateReducer(eventConfig.globalStoreReducer)
+    }
 
     const handler = function (e: Event) {
 
