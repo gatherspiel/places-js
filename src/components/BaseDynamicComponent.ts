@@ -241,11 +241,13 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
     const dispatchers: BaseDispatcher[] = [];
 
+    let componentStoreUpdate:BaseDispatcher;
     if(eventConfig.componentReducer){
-      dispatchers.push(new BaseDispatcher(
+      componentStoreUpdate = new BaseDispatcher(
         component,
         eventConfig.componentReducer,
-      ));
+      )
+      dispatchers.push(componentStoreUpdate);
 
     }
 
@@ -291,7 +293,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
         };
 
         eventUpdater.processEvent(e, validator).then((result: any) => {
-          if (result?.errorMessage) {
+          if (result?.errorMessage && componentStoreUpdate) {
             componentStoreUpdate.updateStore(result);
           }
         });
