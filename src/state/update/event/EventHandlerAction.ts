@@ -27,7 +27,8 @@ export class EventHandlerAction {
         componentStore: this.#component.getComponentStore(),
         targetId: (event.target as HTMLElement).id,
         formSelector: formSelector,
-        params: this.#params
+        params: this.#params,
+        component: this.#component
       });
     }
     return this.#eventHandler({
