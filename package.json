@@ -18,7 +18,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c rollup.config.js --format esm --sourcemap true -o dist/places-js.esm.js"
+    "build": "rollup -c rollup.config.js --format esm --sourcemap true -o dist/places-js.esm.js",
+    "updateLocal": "npm run build && yalc publish --push"
   },
   "repository": {
     "type": "git",
@@ -30,4 +31,5 @@
     "rollup-plugin-typescript2": "^0.36.0",
     "typescript": "^5.9.2"
   }
+
 }
