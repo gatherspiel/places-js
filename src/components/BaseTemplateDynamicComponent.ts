@@ -23,8 +23,8 @@ export abstract class BaseTemplateDynamicComponent extends BaseDynamicComponent 
     else {
       div.innerHTML = this.render(data);
     }
-
   }
+
 
   /*
    - Returns CSS styles specific to the component. The string should be in the format <style> ${CSS styles} </style>

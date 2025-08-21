@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "build": "rollup -c rollup.config.js --format esm --sourcemap true -o dist/places-js.esm.js",
-    "updateLocal": "npm run build && yalc publish --push"
+    "updateLocal": "npm run build && yalc publish --push --replace"
   },
   "repository": {
     "type": "git",

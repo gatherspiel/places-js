@@ -38,7 +38,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   #formSelector: FormSelector
 
-  #componentState: any = {};
+  componentState: any = {};
   static instanceCount = 1;
 
   #eventHandlerConfig:Record<string, EventConfig>;
@@ -169,8 +169,9 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   retrieveData(data: any,
                updateFunction = (data:any)=>data) {
+
     if (!data) {
-      data = this.#componentState
+      data = this.componentState
     }
 
     const updatedData = updateFunction(data);
@@ -180,23 +181,27 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       );
     }
 
-    this.#componentState = {...this.#componentState,...freezeState(updatedData)};
+    this.componentState = {...this.componentState,...freezeState(updatedData)};
+
     this.resetData();
-    this.generateAndSaveHTML(this.#componentState, this.#dependenciesLoaded);
+    this.generateAndSaveHTML(this.componentState, this.#dependenciesLoaded);
 
     if(this.shadowRoot){
       this.#formSelector.setShadowRoot(this.shadowRoot);
     }
     this.attachEventHandlersToDom(this.shadowRoot);
-  }
+
+ }
+
+
 
 
   getComponentStore(){
-    return this.#componentState;
+    return this.componentState;
   }
 
   hasUserEditPermissions(){
-    return this.#componentState?.permissions?.userCanEdit;
+    return this.componentState?.permissions?.userCanEdit;
   }
 
   // @ts-ignore
