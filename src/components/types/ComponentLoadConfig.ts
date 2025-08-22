@@ -16,7 +16,7 @@ export type RequestThunkReducerConfig = {
 
 export type DataThunkItem = {
   dataThunk: BaseThunk;
-  fieldName: string
+  fieldName?: string
   params?: any;
   componentReducer?:(a:any)=>any;
 }

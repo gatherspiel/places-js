@@ -4,6 +4,7 @@ import { BaseDispatcher } from "./BaseDispatcher";
 import {updateGlobalStore} from "../data/GlobalStore";
 
 import type {BaseDynamicComponent} from "../../components/BaseDynamicComponent";
+import {PageState} from "../../spa/PageState";
 
 
 export class BaseThunk {
@@ -19,6 +20,7 @@ export class BaseThunk {
 
   activeRequest:boolean = false;
 
+  preloadEnabled:boolean = false;
   constructor(dataFetch: BaseThunkAction, dispatchers?: BaseDispatcher[]) {
     this.thunkAction = dataFetch;
     this.dispatchers = dispatchers ?? [];
@@ -32,6 +34,10 @@ export class BaseThunk {
     }
   }
 
+  enablePreload(){
+    this.preloadEnabled = true;
+  }
+
   getThunkData():any {
     return this.thunkData;
   }
@@ -43,34 +49,54 @@ export class BaseThunk {
   //This method should eventually replace retrieveData.
   getData(params:any){
 
-    var self = this;
+    const self = this;
     let cacheKey = this.requestStoreId ?? '';
 
-    /*
-     TODO: Add logic to make sure there are no concurrent requests for the same data.
+    console.log("Retrieving data");
+    if(this.preloadEnabled) {
+      console.log("Waiting for preload data")
+      let promise = new Promise(resolve=>{
+        const id = setInterval(()=>{
 
-      If there is a use case for multiple components trying to concurrently retrieve the same API data, then logic
-      should be implemented so that the later requests wait.
+          // @ts-ignore
+          if(window.preloadData) {
+            clearInterval(id);
+            // @ts-ignore
+            resolve(window.preloadData)
+            self.preloadEnabled = false;
+          }
+        },10)
+      });
+      promise.then((response:any)=>{
 
-      For now an error is thrown since this is not a supported use case. Concurrent API calls are likely to lead
-      to bugs that are hard to detect and will cause extra load on a data source.
-     */
-    if(this.activeRequest){
-      throw new Error("Concurrent attempt to retrieve data in a thunk");
+        console.log(response);
+        self.preloadEnabled = false;
+        self.activeRequest = false;
+        self.thunkData = response;
+
+        //TODO: Make sure this reducer doesn't overwrite the thunk data.
+        self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
+          component.updateFromThunkState();
+        })
+      })
+    }
+    // Do not make a data request if there is an active one in progress. It will push data to subscribed components.
+    else if(!this.activeRequest) {
+      console.log("Making request")
+      this.activeRequest = true;
+      this.thunkAction.retrieveData(params, cacheKey).then((response: any) => {
+
+        self.activeRequest = false;
+        self.thunkData = response;
+
+        //TODO: Make sure this reducer doesn't overwrite the thunk data.
+        self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
+          component.updateFromThunkState();
+        })
+      });
+
     }
 
-
-    this.activeRequest = true;
-    this.thunkAction.retrieveData(params, cacheKey).then((response: any) => {
-
-      this.activeRequest = false;
-      self.thunkData = response;
-
-      //TODO: Make sure this reducer doesn't overwrite the thunk data.
-      self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
-        component.updateFromThunkState();
-      })
-    });
   }
 
   //This method should eventually replace subscribeComponent.
