@@ -5,16 +5,12 @@ import {updateGlobalStore} from "../data/GlobalStore";
 
 import type {BaseDynamicComponent} from "../../components/BaseDynamicComponent";
 
-type ComponentSubscription = {
-  component: BaseDynamicComponent,
-  reducer?: (a:any)=>any
-}
 
 export class BaseThunk {
   thunkAction: BaseThunkAction;
   dispatchers: BaseDispatcher[];
 
-  subscribedComponents:ComponentSubscription[];
+  subscribedComponents:BaseDynamicComponent[];
 
   globalStateReducer?: (a: any) => Record<string, string>;
 
@@ -49,18 +45,23 @@ export class BaseThunk {
     var self = this;
     let cacheKey = this.requestStoreId ?? '';
     this.thunkAction.retrieveData(params, cacheKey).then((response: any) => {
-      self.updateStore(response);
+
+      self.thunkData = response;
+
+      //TODO: Make sure this reducer doesn't overwrite the thunk data.
+      self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
+        component.updateFromThunkState();
+      })
     });
   }
 
-
   //This method should eventually replace subscribeComponent.
-  subscribeComponentToData(component:BaseDynamicComponent, reducerFunction?:(a:any)=>any){
+  subscribeComponentToData(component:BaseDynamicComponent){
     let oldDispatcherIndex = -1;
     let i = 0;
 
-    this.subscribedComponents.forEach((subscription: ComponentSubscription) => {
-      if(subscription.component === component) {
+    this.subscribedComponents.forEach((subscribedComponent: BaseDynamicComponent) => {
+      if(subscribedComponent === component) {
         oldDispatcherIndex = i;
       } else {
         i++;
@@ -70,10 +71,7 @@ export class BaseThunk {
     if (oldDispatcherIndex !== -1) {
       this.subscribedComponents = this.subscribedComponents.splice(oldDispatcherIndex, 1);
     }
-    this.subscribedComponents.push({
-      component: component,
-      reducer: reducerFunction
-    });
+    this.subscribedComponents.push(component);
   }
 
   //TODO: Handle preload attempts.
@@ -88,19 +86,8 @@ export class BaseThunk {
 
     var self = this;
     this.thunkAction.retrieveData(params, cacheKey).then((response: any) => {
-      self.thunkData = response;
-
-      self.subscribedComponents.forEach((subscription:ComponentSubscription)=>{
-
-        let componentData = response;
-        //TOOD: Make sure this reducer doesn't overwrite the thunk data.
-        if(subscription.reducer){
-          componentData = subscription.reducer(response);
-        }
-        subscription.component.updateFromThunkState(componentData);
-      })
+      self.updateStore(response)
     });
-
   }
 
   addGlobalStateReducer(
