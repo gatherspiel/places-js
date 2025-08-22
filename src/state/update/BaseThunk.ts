@@ -52,9 +52,8 @@ export class BaseThunk {
     const self = this;
     let cacheKey = this.requestStoreId ?? '';
 
-    console.log("Retrieving data");
-    if(this.preloadEnabled) {
-      console.log("Waiting for preload data")
+    //@ts-ignore
+    if(this.preloadEnabled && (BaseThunk.finishedPreload !== "finished")) {
       let promise = new Promise(resolve=>{
         const id = setInterval(()=>{
 
@@ -63,14 +62,13 @@ export class BaseThunk {
             clearInterval(id);
             // @ts-ignore
             resolve(window.preloadData)
-            self.preloadEnabled = false;
           }
         },10)
       });
       promise.then((response:any)=>{
 
-        console.log(response);
-        self.preloadEnabled = false;
+        //@ts-ignore
+        BaseThunk.finishedPreload = "finished";
         self.activeRequest = false;
         self.thunkData = response;
 
@@ -82,7 +80,6 @@ export class BaseThunk {
     }
     // Do not make a data request if there is an active one in progress. It will push data to subscribed components.
     else if(!this.activeRequest) {
-      console.log("Making request")
       this.activeRequest = true;
       this.thunkAction.retrieveData(params, cacheKey).then((response: any) => {
 

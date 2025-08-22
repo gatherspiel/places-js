@@ -122,11 +122,11 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       });
 
       globalStateLoadConfig?.dataThunks.forEach((thunkItem:DataThunkItem)=>{
-        let params:Record<string, string> = {};
+        let params:Record<string, string> = thunkItem.params ?? {}
 
-        if(thunkItem.params){
-          Object.keys(thunkItem.params).forEach((name:any)=>{
-            params[name]=getUrlParameter(thunkItem.params.name);
+        if(thunkItem.urlParams){
+          thunkItem.urlParams.forEach((name:any)=>{
+            params[name]=getUrlParameter(name);
           })
         }
         thunkItem.dataThunk.getData(params)
@@ -154,6 +154,10 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       });
     }
 
+  }
+
+  disconnectedCallback(){
+    console.log("Disconnecting component. Subscriptions should be cleaned up");
   }
 
   resetData(){

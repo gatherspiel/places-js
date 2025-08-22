@@ -1,4 +1,3 @@
-export {generatePreloadThunk} from "./state/update/PreloadThunk";
 
 export {setupGlobalState} from './state/data/GlobalStore'
 export * from './state/data/SessionStorageUtils'

@@ -18,6 +18,7 @@ export type DataThunkItem = {
   dataThunk: BaseThunk;
   fieldName?: string
   params?: any;
+  urlParams?:any;
   componentReducer?:(a:any)=>any;
 }
 /**
