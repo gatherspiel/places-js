@@ -1,7 +1,7 @@
 import type {DisplayItem} from "./types/DisplayItem";
 
 import {
-  type ComponentLoadConfig, type DataFieldConfig,
+  type ComponentLoadConfig, type DataFieldConfig, DataThunkItem,
   GLOBAL_FIELD_SUBSCRIPTIONS_KEY,
   GLOBAL_STATE_LOAD_CONFIG_KEY,
   REQUEST_THUNK_REDUCERS_KEY,
@@ -111,6 +111,19 @@ export abstract class BaseDynamicComponent extends HTMLElement {
         (fieldName: string) => {
         subscribeToGlobalField(self, fieldName);
       });
+
+      if(globalStateLoadConfig.dataThunks){
+        globalStateLoadConfig?.dataThunks.forEach((thunkItem:DataThunkItem)=>{
+          let params:Record<string, string> = {};
+
+          if(thunkItem.params){
+            thunkItem.params.forEach((name:any)=>{
+              params[name]=getUrlParameter(name);
+            })
+          }
+          thunkItem.dataThunk.retrieveData(thunkItem)
+        });
+      }
     }
 
     if (loadConfig[REQUEST_THUNK_REDUCERS_KEY]) {
@@ -309,6 +322,55 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     return handler;
   }
 
+  //This function should eventually replace updateFromGlobalState
+  updateFromThunkState(thunkState:any) {
+
+
+    const globalStateLoadConfig =
+      this.#componentLoadConfig.globalStateLoadConfig;
+    if (!globalStateLoadConfig) {
+      throw new Error(`Component global state config is not defined for component ${this.componentId}`);
+    }
+
+    let reducer =
+      this.#componentLoadConfig.globalStateLoadConfig?.defaultGlobalStateReducer ??
+      ((updates: Record<string, string>) => updates)
+
+
+    let dataLoaded = true;
+    this.#componentLoadConfig?.globalStateLoadConfig?.dataThunks.forEach((item:DataThunkItem)=> {
+      if(!item.dataThunk.hasThunkData()){
+        dataLoaded = false;
+      }
+    });
+
+    if(dataLoaded){
+      this.#dependenciesLoaded = true;
+    }
+
+
+    this.#componentLoadConfig.globalStateLoadConfig?.globalFieldSubscriptions?.forEach(
+      (fieldName) => {
+      },
+    );
+
+    if(this.#dependenciesLoaded){
+
+      let dataToUpdate: Record<string, string> = {};
+      this.#componentLoadConfig?.globalStateLoadConfig?.dataThunks.forEach((item:DataThunkItem)=> {
+        dataToUpdate[item.fieldName] = item.dataThunk.getThunkData();
+      })
+
+      this.retrieveData(
+        dataToUpdate,
+        reducer
+      );
+    }
+  }
+
+
+
+
   updateFromGlobalState(globalStateData:any) {
 
 
@@ -350,8 +412,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
         reducer
       );
     }
-
-
   }
+
   abstract render(data: Record<any, DisplayItem> | any): string;
 }

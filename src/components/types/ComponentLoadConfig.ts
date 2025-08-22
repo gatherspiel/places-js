@@ -13,13 +13,21 @@ export type RequestThunkReducerConfig = {
   reducerField?: string;
 };
 
+
+export type DataThunkItem = {
+  dataThunk: BaseThunk;
+  fieldName: string
+  params?: any;
+  componentReducer?:(a:any)=>any;
+}
 /**
  * Global state that the component depends on. The component will not be rendered until the global state
  * is ready.
  */
 export type GlobalStateLoadConfig = {
-  [GLOBAL_FIELD_SUBSCRIPTIONS_KEY]: string[];
+  [GLOBAL_FIELD_SUBSCRIPTIONS_KEY]?: string[];
   [DEFAULT_GLOBAL_STATE_REDUCER_KEY]?: (updates: any) => any; //Default reducer from global state if there is no dependent API request.
+  dataThunks?:DataThunkItem[]
 };
 
 export type DataFieldConfig = {
