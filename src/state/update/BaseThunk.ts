@@ -15,8 +15,9 @@ export class BaseThunk {
   globalStateReducer?: (a: any) => Record<string, string>;
 
   requestStoreId?: string;
-
   thunkData:any = null
+
+  activeRequest:boolean = false;
 
   constructor(dataFetch: BaseThunkAction, dispatchers?: BaseDispatcher[]) {
     this.thunkAction = dataFetch;
@@ -44,8 +45,25 @@ export class BaseThunk {
 
     var self = this;
     let cacheKey = this.requestStoreId ?? '';
+
+    /*
+     TODO: Add logic to make sure there are no concurrent requests for the same data.
+
+      If there is a use case for multiple components trying to concurrently retrieve the same API data, then logic
+      should be implemented so that the later requests wait.
+
+      For now an error is thrown since this is not a supported use case. Concurrent API calls are likely to lead
+      to bugs that are hard to detect and will cause extra load on a data source.
+     */
+    if(this.activeRequest){
+      throw new Error("Concurrent attempt to retrieve data in a thunk");
+    }
+
+
+    this.activeRequest = true;
     this.thunkAction.retrieveData(params, cacheKey).then((response: any) => {
 
+      this.activeRequest = false;
       self.thunkData = response;
 
       //TODO: Make sure this reducer doesn't overwrite the thunk data.
