@@ -37,8 +37,6 @@ export class FormSelector {
     if(!formValue && this.formSelectors.has(formConfig.id)){
       formValue = this.getValue(formConfig.id);
     }
-    console.log(formConfig.lineBreakAfterLabel)
-
     this.formSelectors.add(formConfig.id);
     return `
       ${formConfig[COMPONENT_LABEL_KEY] ? 

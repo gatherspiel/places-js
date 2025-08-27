@@ -45,7 +45,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   #eventTagIdCount = 0;
   #elementIdTag:string;
 
-  constructor(loadConfig: ComponentLoadConfig = {}, enablePreload?:boolean) {
+  constructor(loadConfig: ComponentLoadConfig = {}) {
     super();
 
     this.#eventHandlerConfig = {};
@@ -68,7 +68,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
           self.#dependenciesLoaded = false;
         }
 
-        let dataSource:BaseThunk = (enablePreload && item.preloadSource) ? item.preloadSource : item.dataSource;
+        let dataSource:BaseThunk = item.dataSource;
 
         let storeReducer = dataSource.globalStateReducer
         if(!storeReducer){
