@@ -45,6 +45,8 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   #eventTagIdCount = 0;
   #elementIdTag:string;
 
+  #subscribedThunks: BaseThunk[] = [];
+
   constructor(loadConfig: ComponentLoadConfig = {}) {
     super();
 
@@ -119,6 +121,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       const self = this;
       globalStateLoadConfig?.dataThunks.forEach((thunkItem:DataThunkItem)=> {
         thunkItem.dataThunk.subscribeComponentToData(self)
+        self.#subscribedThunks.push(thunkItem.dataThunk);
       });
 
       globalStateLoadConfig?.dataThunks.forEach((thunkItem:DataThunkItem)=>{
@@ -157,7 +160,10 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   }
 
   disconnectedCallback(){
-    console.log("Disconnecting component. Subscriptions should be cleaned up");
+    const self = this;
+    self.#subscribedThunks.forEach((thunk:BaseThunk)=>{
+      thunk.unsubscribeComponent(self)
+    });
   }
 
   resetData(){

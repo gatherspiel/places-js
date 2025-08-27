@@ -96,6 +96,15 @@ export class BaseThunk {
 
   }
 
+  unsubscribeComponent(component:BaseDynamicComponent){
+    const idx = this.subscribedComponents.indexOf(component);
+    if(idx === -1){
+      console.warn(`Attempt to unsubscribe ${component.componentId} from thunk it is not subscribed to`)
+      return;
+    }
+    this.subscribedComponents.splice(idx, 1);
+  }
+
   //This method should eventually replace subscribeComponent.
   subscribeComponentToData(component:BaseDynamicComponent){
     let oldDispatcherIndex = -1;

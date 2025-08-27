@@ -1,17 +1,13 @@
-
-
 import {getComponent} from "../components/ComponentRegistry";
 import {PageState} from "./PageState";
 
 import type {BaseDynamicComponent} from "../components/BaseDynamicComponent";
 import {clearGlobalStore} from "../state/data/GlobalStore";
 
-
 export abstract class AbstractPageComponent extends HTMLElement {
 
   static #currentComponent: AbstractPageComponent;
   #routeMap:Record<string, (params:any)=>string>;
-
 
   constructor() {
     super();
