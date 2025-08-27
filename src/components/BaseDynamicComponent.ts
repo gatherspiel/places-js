@@ -224,10 +224,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
  }
 
- //If data is
-
-
-
   getComponentStore(){
     return this.componentState;
   }
@@ -250,6 +246,9 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     return this.#formSelector.generateTextInputFormItem(formConfig);
   }
 
+  getFormValue(id:string){
+    return this.#formSelector.getValue(id);
+  }
 
   createEvent(eventConfig: any, eventType:string, params?:any){
     const eventHandler = this.createHandler(
