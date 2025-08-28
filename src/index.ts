@@ -6,6 +6,7 @@ export * from './components/types/ComponentLoadConfig';
 export {serializeJSONProp,deserializeJSONProp} from './components/utils/ComponentUtils';
 export {generateErrorMessage, generateSuccessMessage} from './components/utils/StatusIndicators';
 
+export {BaseTemplateComponent} from './components/BaseTemplateComponent'
 export {BaseDynamicComponent} from './components/BaseDynamicComponent'
 export {BaseTemplateDynamicComponent} from './components/BaseTemplateDynamicComponent'
 export {FormSelector} from './FormSelector';

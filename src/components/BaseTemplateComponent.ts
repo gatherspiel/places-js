@@ -8,8 +8,11 @@ export abstract class BaseTemplateComponent extends HTMLElement {
       throw new Error("shadowRoot is not defined");
     }
 
-    const template = this.getTemplate();
-    this.shadowRoot?.appendChild(template.content.cloneNode(true));
+    const templateStyle = this.getTemplateStyle();
+    const template = document.createElement("template");
+    template.innerHTML = templateStyle + `<div></div>`;
+    this.shadowRoot!.appendChild(template.content.cloneNode(true));
+
 
     const div = this.shadowRoot?.querySelector("div");
     if (!div) {
@@ -17,9 +20,15 @@ export abstract class BaseTemplateComponent extends HTMLElement {
     }
 
     div.innerHTML = this.render();
+
+    if(this.attachEventHandlersToDom){
+      this.attachEventHandlersToDom(this.shadowRoot);
+    }
   }
 
-  abstract getTemplate(): HTMLTemplateElement;
+  attachEventHandlersToDom?(shadowRoot:ShadowRoot):any
+
+  abstract getTemplateStyle(): string;
 
   abstract render(data?: any): string;
 }
