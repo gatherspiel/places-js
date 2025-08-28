@@ -46,8 +46,21 @@ export class BaseThunk {
     return this.thunkData !== null;
   }
 
+  updateThunkState(thunkData:any){
+    this.thunkData = thunkData;
+    this.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
+      component.updateFromThunkState();
+    })
+  }
+
   //This method should eventually replace retrieveData.
-  getData(params:any){
+  /**
+   * Retrieves data from API thunk.
+   * @param params
+   * @param subscribedThunk: Data thunk that will be subscribed to data updates from this thunk. This is an
+   * optional parameter that is only supported for requests that re not preloads.
+   */
+  getData(params:any, subscribedThunk?:BaseThunk){
 
     const self = this;
     let cacheKey = this.requestStoreId ?? '';
@@ -86,14 +99,19 @@ export class BaseThunk {
         self.activeRequest = false;
         self.thunkData = response;
 
+        if(subscribedThunk){
+
+          subscribedThunk.updateThunkState(response);
+          if(self.subscribedComponents){
+            throw new Error("A thunk cannot have a subscribed thunk and a subscribed component");
+          }
+        }
         //TODO: Make sure this reducer doesn't overwrite the thunk data.
         self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
           component.updateFromThunkState();
         })
       });
-
     }
-
   }
 
   unsubscribeComponent(component:BaseDynamicComponent){
@@ -126,6 +144,11 @@ export class BaseThunk {
 
   //TODO: Handle preload attempts.
   //TODO: Handle cases where there are concurrent calls
+  /**
+   * @deprecated
+   * @param params
+   * @param updateFunction
+   */
   retrieveData(params: any,updateFunction?: (a?: any) => any) {
 
     let cacheKey = this.requestStoreId ?? '';

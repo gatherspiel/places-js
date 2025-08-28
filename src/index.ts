@@ -1,6 +1,6 @@
 
 export {setupGlobalState} from './state/data/GlobalStore'
-export * from './state/data/SessionStorageUtils'
+export {clearSessionStorage} from './state/data/SessionStorageUtils'
 
 export * from './components/types/ComponentLoadConfig';
 export {serializeJSONProp,deserializeJSONProp} from './components/utils/ComponentUtils';
@@ -15,6 +15,7 @@ export {AbstractPageComponent} from './spa/AbstractPageComponent';
 
 export {generateApiThunk,generateApiThunkWithExternalConfig} from "./state/update/api/ApiThunkFactory";
 export {ApiActionTypes} from "./state/update/api/types/ApiActionTypes";
+export {InternalApiAction} from "./state/update/api/InternalApiAction";
 
 export type {ApiRequestConfig} from "./state/update/api/types/ApiRequestConfig";
 export type {DefaultApiAction} from "./state/update/api/DefaultApiAction"

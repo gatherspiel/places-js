@@ -28,7 +28,6 @@ export class InternalApiAction extends BaseThunkAction {
   async retrieveData(params: any, cacheKey?: string): Promise<any> {
 
     const queryConfig: ApiRequestConfig = this.#getQueryConfig(params);
-    const authData = getAccessTokenIfPresent();
 
     let requestKey = ''
     if(cacheKey && cacheKey.length > 0){
@@ -45,11 +44,8 @@ export class InternalApiAction extends BaseThunkAction {
       queryConfig.headers = {};
     }
 
-    if (authData && queryConfig.headers) {
-      queryConfig.headers["authToken"] = authData;
-    }
 
-    const response = await this.#getResponseData(
+    const response = await InternalApiAction.getResponseData(
       queryConfig,
       this.#defaultResponse,
     );
@@ -64,20 +60,57 @@ export class InternalApiAction extends BaseThunkAction {
     return response;
   }
 
-  static #defaultApiErrorResponse = (responseData: any) => {
-    throw new Error(JSON.stringify(responseData, null, 2));
-  };
 
-  static #defaultApiSuccessResponse =  () =>{
-    return { status: 200 };
-  };
+  static async #getErrorData(response:any, mockSettings:any, url:string){
+    console.warn(
+      "Did not retrieve data from API. Mock data will be used",
+    );
 
-  async #getResponseData(
-    queryConfig: ApiRequestConfig,
-    mockSettings?: DefaultApiAction,
-  ) {
+    let message = "";
+
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      message = await response.json();
+    } else {
+      if (response.status === 404) {
+        message = `Endpoint ${url} not found`;
+      } else {
+        message = await response.text();
+      }
+    }
+
+    const responseData: any = {
+      status: response.status,
+      message: message,
+      endpoint: url,
+    };
+
+    return mockSettings?.defaultFunction
+      ? mockSettings?.defaultFunction(responseData)
+      : InternalApiAction.#defaultApiErrorResponse(responseData);
+  }
+
+  /**
+   * Directly make an API request and return the data. Use this method if the API request needs
+   * to be run as part of an event handler and no other components subscribe to the request.
+   */
+  static async getResponseData(queryConfig: ApiRequestConfig,
+                             mockSettings?: DefaultApiAction,){
     const url = queryConfig.url;
     const useDefault = mockSettings?.defaultFunctionPriority;
+
+    const authData = getAccessTokenIfPresent();
+
+    if (authData) {
+
+      if(queryConfig.headers){
+        queryConfig.headers["authToken"] = authData;
+      } else {
+        queryConfig.headers = {
+          "authToken": authData
+        }
+      }
+    }
 
     try {
       if (!useDefault) {
@@ -113,36 +146,13 @@ export class InternalApiAction extends BaseThunkAction {
     return mockSettings?.defaultFunction ? mockSettings.defaultFunction() : {};
   }
 
-  async #getErrorData(response:any, mockSettings:any, url:string){
-    console.warn(
-      "Did not retrieve data from API. Mock data will be used",
-    );
+  static #defaultApiErrorResponse = (responseData: any) => {
+    throw new Error(JSON.stringify(responseData, null, 2));
+  };
 
-    let message = "";
-
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-      message = await response.json();
-    } else {
-      if (response.status === 404) {
-        message = `Endpoint ${url} not found`;
-      } else {
-        message = await response.text();
-      }
-    }
-
-    const responseData: any = {
-      status: response.status,
-      message: message,
-      endpoint: url,
-    };
-
-    return mockSettings?.defaultFunction
-      ? mockSettings?.defaultFunction(responseData)
-      : InternalApiAction.#defaultApiErrorResponse(responseData);
-  }
-
-
+  static #defaultApiSuccessResponse =  () =>{
+    return { status: 200 };
+  };
 
 
 }

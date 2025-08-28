@@ -215,6 +215,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     this.componentState = {...this.componentState,...freezeState(updatedData)};
 
     this.resetData();
+
     this.generateAndSaveHTML(this.componentState, this.#dependenciesLoaded);
 
     if(this.shadowRoot){
@@ -360,6 +361,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     if(dataLoaded){
       this.#dependenciesLoaded = true;
     }
+
 
     if(this.#dependenciesLoaded){
 
