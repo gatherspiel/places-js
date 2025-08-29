@@ -4,8 +4,6 @@ import {
   type ComponentLoadConfig, type DataFieldConfig, DataThunkItem,
   GLOBAL_FIELD_SUBSCRIPTIONS_KEY,
   GLOBAL_STATE_LOAD_CONFIG_KEY,
-  REQUEST_THUNK_REDUCERS_KEY,
-  type RequestThunkReducerConfig,
   validComponentLoadConfigFields,
 } from "./types/ComponentLoadConfig";
 import type {BaseThunk} from "../state/update/BaseThunk";
@@ -135,27 +133,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
           })
         }
         thunkItem.dataThunk.getData(params)
-      });
-    }
-
-
-    if (loadConfig[REQUEST_THUNK_REDUCERS_KEY]) {
-
-      loadConfig[REQUEST_THUNK_REDUCERS_KEY].forEach((
-        config: RequestThunkReducerConfig,
-      ) => {
-        if (!config.thunk) {
-          throw new Error(
-            `Missing thunk field in ${self.componentId} reducer configuration`,
-          );
-        }
-        config.thunk.subscribeComponent(
-          this,
-          config?.componentReducer ?? function(data:any){
-            return data
-          },
-          config.reducerField,
-        );
       });
     }
 
