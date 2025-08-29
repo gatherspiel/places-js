@@ -74,6 +74,9 @@ export class BaseThunk {
         self.activeRequest = false;
         self.thunkData = response;
 
+        if(subscribedThunk){
+          subscribedThunk.updateThunkState(response);
+        }
         //TODO: Make sure this reducer doesn't overwrite the thunk data.
         self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
           component.updateFromThunkState();

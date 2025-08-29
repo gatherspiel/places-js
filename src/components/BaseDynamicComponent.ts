@@ -6,26 +6,18 @@ import {getUrlParameter} from "../utils/UrlParamUtils";
 import {freezeState} from "../utils/Immutable";
 import {GlobalStateSubscription} from "./types/GlobalStateSubscription";
 
-type EventConfig = {
-  eventType: string;
-  eventFunction: (e: Event) => any;
-};
-
 export abstract class BaseDynamicComponent extends HTMLElement {
 
   readonly componentId: string
 
   #dependenciesLoaded: boolean = true;
   #globalStateSubscriptions: GlobalStateSubscription[];
-
   #formSelector: FormSelector
 
   componentState: any = {};
   static instanceCount = 1;
 
-
   #subscribedThunks: BaseThunk[] = [];
-
   attachedEventsToShadowRoot:boolean = false;
 
   constructor(globalStateSubscriptions: GlobalStateSubscription[] = []) {

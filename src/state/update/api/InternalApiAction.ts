@@ -81,7 +81,7 @@ export class InternalApiAction extends BaseThunkAction {
 
     const responseData: any = {
       status: response.status,
-      message: message,
+      errorMessage: message,
       endpoint: url,
     };
 
@@ -93,6 +93,8 @@ export class InternalApiAction extends BaseThunkAction {
   /**
    * Directly make an API request and return the data. Use this method if the API request needs
    * to be run as part of an event handler and no other components subscribe to the request.
+   *
+   * Cache data will not be used or updated.
    */
   static async getResponseData(queryConfig: ApiRequestConfig,
                              mockSettings?: DefaultApiAction,){
@@ -137,15 +139,11 @@ export class InternalApiAction extends BaseThunkAction {
         return InternalApiAction.#defaultApiSuccessResponse;
       }
     } catch (e: any) {
-      const responseData: any = {
-        status: null,
-        message: e.message,
-        endpoint: url,
-      };
+
 
       return mockSettings?.defaultFunction
-        ? mockSettings?.defaultFunction(responseData)
-        : InternalApiAction.#defaultApiErrorResponse(responseData);
+        ? mockSettings?.defaultFunction(e.message)
+        : JSON.parse(e.message)
     }
     return mockSettings?.defaultFunction ? mockSettings.defaultFunction() : {};
   }
