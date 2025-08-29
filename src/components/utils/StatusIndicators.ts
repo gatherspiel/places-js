@@ -1,5 +1,3 @@
-
-
 export function generateLoadingIndicator(){
   return `<h1>Loading</h1>`
 }

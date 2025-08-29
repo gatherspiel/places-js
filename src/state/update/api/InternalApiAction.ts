@@ -8,7 +8,7 @@ import {
   clearSessionStorage,
   getItemFromSessionStorage,
   updateSessionStorage
-} from "../../data/SessionStorageUtils";
+} from "../../storage/SessionStorageUtils";
 export class InternalApiAction extends BaseThunkAction {
   readonly #defaultResponse: DefaultApiAction;
   readonly #getQueryConfig: (a: any) => ApiRequestConfig;

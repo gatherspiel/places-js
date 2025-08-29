@@ -1,5 +1,3 @@
-import type {EventHandlerThunkConfig} from "../../state/update/event/types/EventHandlerThunkConfig";
-
 export type DropdownConfigItem = {
   index: number
   name:string
@@ -13,6 +11,4 @@ export type DropdownConfig = {
   selected: string,
   defaultParameter: string,
   defaultParameterDisplay:string,
-  eventHandlerConfig: EventHandlerThunkConfig,
-
 }

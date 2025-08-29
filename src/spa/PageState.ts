@@ -10,8 +10,6 @@ export class PageState {
   static activeComponent: HTMLElement;
   static activeComponentType: typeof BaseDynamicComponent;
 
-  static pageLoaded: boolean;
-
   static #prevComponents: PageStateItem[] = [];
 
   static popPrevComponent(): PageStateItem | undefined {

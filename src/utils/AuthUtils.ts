@@ -1,4 +1,4 @@
-import {getLocalStorageDataIfPresent} from "./LocalStorageUtils";
+import {getLocalStorageDataIfPresent} from "../state/storage/LocalStorageUtils";
 
 export function getAccessTokenIfPresent() {
   const authData = getLocalStorageDataIfPresent("access_token");

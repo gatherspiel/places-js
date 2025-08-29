@@ -1,6 +1,6 @@
 import type {FormInputConfig} from "./components/types/FormInputConfig";
-import {COMPONENT_LABEL_KEY} from "./Constants";
 import {BaseDynamicComponent} from "./components/BaseDynamicComponent";
+
 
 export class FormSelector {
 
@@ -39,14 +39,13 @@ export class FormSelector {
     }
     this.formSelectors.add(formConfig.id);
     return `
-      ${formConfig[COMPONENT_LABEL_KEY] ? 
-        `<label for=${formConfig.id}>${formConfig[COMPONENT_LABEL_KEY]}</label>
+      ${formConfig["componentLabel"] ? 
+        `<label for=${formConfig.id}>${formConfig["componentLabel"]}</label>
          ${formConfig.lineBreakAfterLabel !== false? `<br>` : ''}
 
         `
       : ``}
       <input
-        ${formConfig.eventConfig ? component.createEvent(formConfig.eventConfig,"change") : ''}
         ${formConfig.className ? `class="${formConfig.className}"` : ``}
         id=${formConfig.id}
         name=${formConfig.id}
@@ -64,7 +63,7 @@ export class FormSelector {
     this.formSelectors.add(formConfig.id);
 
     return `
-      <label for=${formConfig.id}>${formConfig[COMPONENT_LABEL_KEY]}</label>
+      <label for=${formConfig.id}>${formConfig["componentLabel"]}</label>
       ${formConfig.lineBreakAfterLabel !== false? `<br>` : ''}
       <textarea
         ${formConfig.className ? `class="${formConfig.className}"` : ``}
@@ -76,5 +75,4 @@ export class FormSelector {
       <br>
     `
   }
-
 }

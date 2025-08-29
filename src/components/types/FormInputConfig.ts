@@ -1,12 +1,9 @@
-import {COMPONENT_LABEL_KEY} from "../../Constants.js";
-import {EventHandlerThunkConfig} from "../../state/update/event/types/EventHandlerThunkConfig";
 
 export type FormInputConfig = {
-  [COMPONENT_LABEL_KEY]?: string,
+  componentLabel: string,
   id: string,
   value?: string, //If the value is undefined, a previous input value will be used if it is present.
   inputType: string,
   className?:string,
   lineBreakAfterLabel?: boolean,
-  eventConfig?:EventHandlerThunkConfig
 }

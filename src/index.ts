@@ -1,8 +1,9 @@
 
-export {setupGlobalState} from './state/data/GlobalStore'
-export {clearSessionStorage} from './state/data/SessionStorageUtils'
+export type {GlobalStateSubscription} from './components/types/GlobalStateSubscription';
 
-export * from './components/types/ComponentLoadConfig';
+export {clearSessionStorage} from './state/storage/SessionStorageUtils'
+
+export * from './components/types/GlobalStateSubscription';
 export {serializeJSONProp,deserializeJSONProp} from './components/utils/ComponentUtils';
 export {generateErrorMessage, generateSuccessMessage} from './components/utils/StatusIndicators';
 
@@ -24,14 +25,9 @@ export type {DefaultApiAction} from "./state/update/api/DefaultApiAction"
 export {BaseThunkAction} from './state/update/BaseThunkAction';
 export * from './state/update/BaseThunk';
 
-export type {EventHandlerThunkConfig} from './state/update/event/types/EventHandlerThunkConfig'
-export type {EventHandlerData} from './state/update/event/types/EventHandlerData'
-export type {EventValidationResult} from './state/update/event/types/EventValidationResult'
-
 export type {DropdownConfig} from 'components/types/DropdownConfig'
 export type {DropdownConfigItem} from 'components/types/DropdownConfig'
 
-export {REDIRECT_HANDLER_CONFIG} from './handler/RedirectHandler';
 
 export {
   combineDateAndTime,
@@ -45,6 +41,4 @@ export {
   validateDateFormat} from './utils/EventDataUtils'
 
 export {getUrlParameter} from './utils/UrlParamUtils'
-export {addLocalStorageData,deleteLocalStoreData, getLocalStorageDataIfPresent} from './utils/LocalStorageUtils'
-
-export * from './Constants'
+export {addLocalStorageData,deleteLocalStoreData, getLocalStorageDataIfPresent} from './state/storage/LocalStorageUtils'
