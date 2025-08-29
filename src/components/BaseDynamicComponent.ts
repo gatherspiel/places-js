@@ -47,6 +47,8 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   #subscribedThunks: BaseThunk[] = [];
 
+  addedShadowDomEventHandlers:boolean = false;
+
   constructor(loadConfig: ComponentLoadConfig = {}) {
     super();
 
@@ -221,9 +223,13 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     if(this.shadowRoot){
       this.#formSelector.setShadowRoot(this.shadowRoot);
     }
-    this.attachEventHandlersToDom(this.shadowRoot);
 
+    if(!this.addedShadowDomEventHandlers && this.shadowRoot){
+      this.attachEventHandlersToDom(this.shadowRoot);
+      this.addedShadowDomEventHandlers = true;
+    }
  }
+
 
   getComponentStore(){
     return this.componentState;
