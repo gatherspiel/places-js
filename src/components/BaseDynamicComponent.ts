@@ -45,7 +45,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   #subscribedThunks: BaseThunk[] = [];
 
-  addedShadowDomEventHandlers:boolean = false;
+  attachedEventsToShadowRoot:boolean = false;
 
   constructor(loadConfig: ComponentLoadConfig = {}) {
     super();
@@ -201,12 +201,19 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       this.#formSelector.setShadowRoot(this.shadowRoot);
     }
 
-    if(!this.addedShadowDomEventHandlers && this.shadowRoot){
+    if(this.shadowRoot){
       this.attachEventHandlersToDom(this.shadowRoot);
-      this.addedShadowDomEventHandlers = true;
+      if(this.attachEventsToShadowRoot && !this.attachedEventsToShadowRoot){
+        this.attachEventsToShadowRoot(this.shadowRoot);
+        this.attachedEventsToShadowRoot = true;
+      }
     }
  }
 
+  /*
+    Override this method to attach events to the component shadow root.
+   */
+  attachEventsToShadowRoot?(shadowRoot:any):any
 
   getComponentStore(){
     return this.componentState;
