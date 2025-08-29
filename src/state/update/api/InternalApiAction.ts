@@ -130,6 +130,10 @@ export class InternalApiAction extends BaseThunkAction {
           return result;
         }
 
+        //Clear cache because there was a likely data update.
+        if(queryConfig.method !== ApiActionTypes.GET){
+          clearSessionStorage();
+        }
         return InternalApiAction.#defaultApiSuccessResponse;
       }
     } catch (e: any) {
