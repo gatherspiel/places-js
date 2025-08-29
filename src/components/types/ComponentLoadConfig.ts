@@ -1,6 +1,5 @@
 import type {BaseThunk} from "../../state/update/BaseThunk";
 
-export const REQUEST_THUNK_REDUCERS_KEY  = "requestThunkReducers"
 export const GLOBAL_STATE_LOAD_CONFIG_KEY = "globalStateLoadConfig"
 export const GLOBAL_FIELD_SUBSCRIPTIONS_KEY = "globalFieldSubscriptions"
 export const DEFAULT_GLOBAL_STATE_REDUCER_KEY = "defaultGlobalStateReducer"
@@ -39,14 +38,12 @@ export type DataFieldConfig = {
 }
 
 export type ComponentLoadConfig = {
-  [REQUEST_THUNK_REDUCERS_KEY]?: RequestThunkReducerConfig[];
   [GLOBAL_STATE_LOAD_CONFIG_KEY]?: GlobalStateLoadConfig;
   [DATA_FIELDS]?: DataFieldConfig[]
 };
 
 
 export const validComponentLoadConfigFields = [
-  REQUEST_THUNK_REDUCERS_KEY,
   GLOBAL_STATE_LOAD_CONFIG_KEY,
   DATA_FIELDS
 ];
