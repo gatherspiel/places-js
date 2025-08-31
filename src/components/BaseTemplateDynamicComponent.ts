@@ -1,7 +1,7 @@
 import { BaseDynamicComponent } from "./BaseDynamicComponent";
 
 export abstract class BaseTemplateDynamicComponent extends BaseDynamicComponent {
-  override generateAndSaveHTML(data: any, dependenciesLoaded:boolean) {
+  override generateAndSaveHTML(data: any) {
     if (this.shadowRoot === null) {
       this.attachShadow({ mode: "open" });
 
@@ -17,7 +17,7 @@ export abstract class BaseTemplateDynamicComponent extends BaseDynamicComponent 
       throw new Error(`Did not find div when creating template component`);
     }
 
-    if(this.showLoadingHtml && !dependenciesLoaded) {
+    if(this.showLoadingHtml) {
       div.innerHTML = this.showLoadingHtml();
     }
     else {
