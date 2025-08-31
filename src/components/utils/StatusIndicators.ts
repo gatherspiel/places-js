@@ -1,7 +1,3 @@
-export function generateLoadingIndicator(){
-  return `<h1>Loading</h1>`
-}
-
 export function generateErrorMessage(message: string | string[] | undefined){
   if(Array.isArray(message)){
     let html = ''

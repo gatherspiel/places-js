@@ -1,5 +1,3 @@
-
-
 export function getComponent(componentName: string,enablePreload?:boolean): HTMLElement {
 
   const item = customElements.get(componentName);

@@ -8,7 +8,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   readonly componentId: string
 
-  #dependenciesLoaded: boolean = true;
+  #globalStateLoaded: boolean = true;
   #globalStateSubscriptions: GlobalStateSubscription[];
 
   componentState: any = {};
@@ -60,12 +60,12 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     const updatedData = updateFunction(data);
     if (!updatedData) {
       throw new Error(
-        `Update function for  must return a JSON object`,
+        `Update function for ${this.componentId} must return a JSON object`,
       );
     }
 
     this.componentState = {...this.componentState,...freezeState(updatedData)};
-    this.generateAndSaveHTML(this.componentState, this.#dependenciesLoaded);
+    this.generateAndSaveHTML(this.componentState);
 
     if(this.shadowRoot){
       if(this.attachEventHandlersToDom){
@@ -94,7 +94,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   }
 
   // @ts-ignore
-  generateAndSaveHTML(data: any, dependenciesLoaded:boolean) {
+  generateAndSaveHTML(data: any) {
     this.innerHTML = this.render(data);
   }
 
@@ -107,11 +107,11 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     });
 
     if(dataLoaded){
-      this.#dependenciesLoaded = true;
+      this.#globalStateLoaded = true;
     }
 
     const self = this;
-    if(this.#dependenciesLoaded){
+    if(this.#globalStateLoaded){
 
       let dataToUpdate: any = {}
       this.#globalStateSubscriptions?.forEach((item:GlobalStateSubscription)=> {

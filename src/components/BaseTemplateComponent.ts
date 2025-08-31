@@ -13,7 +13,6 @@ export abstract class BaseTemplateComponent extends HTMLElement {
     template.innerHTML = templateStyle + `<div></div>`;
     this.shadowRoot!.appendChild(template.content.cloneNode(true));
 
-
     const div = this.shadowRoot?.querySelector("div");
     if (!div) {
       throw new Error("template must be defined with a <div></div> tag");

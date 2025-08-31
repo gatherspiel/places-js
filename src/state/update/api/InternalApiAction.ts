@@ -2,12 +2,12 @@ import { BaseThunkAction } from "../BaseThunkAction";
 
 import type { ApiRequestConfig } from "./types/ApiRequestConfig";
 import { ApiActionTypes } from "./types/ApiActionTypes";
-import {getAccessTokenIfPresent} from "../../../utils/AuthUtils";
 import {
   clearSessionStorage,
   getItemFromSessionStorage,
   updateSessionStorage
 } from "../../storage/SessionStorageUtils";
+import {getLocalStorageDataIfPresent} from "../../storage/LocalStorageUtils";
 export class InternalApiAction extends BaseThunkAction {
   readonly #getQueryConfig: (a: any) => ApiRequestConfig;
 
@@ -89,7 +89,7 @@ export class InternalApiAction extends BaseThunkAction {
     const url = queryConfig.url;
 
 
-    const authData = getAccessTokenIfPresent();
+    const authData = getLocalStorageDataIfPresent("access_token")?.access_token
 
     if (authData) {
 
