@@ -1,4 +1,3 @@
-import type { DefaultApiAction } from "./DefaultApiAction";
 import { BaseThunkAction } from "../BaseThunkAction";
 
 import type { ApiRequestConfig } from "./types/ApiRequestConfig";
@@ -10,16 +9,13 @@ import {
   updateSessionStorage
 } from "../../storage/SessionStorageUtils";
 export class InternalApiAction extends BaseThunkAction {
-  readonly #defaultResponse: DefaultApiAction;
   readonly #getQueryConfig: (a: any) => ApiRequestConfig;
 
   constructor(
     getQueryConfig: (a: any) => ApiRequestConfig,
-    defaultResponse: DefaultApiAction,
   ) {
     super();
     this.#getQueryConfig = getQueryConfig;
-    this.#defaultResponse = defaultResponse;
   }
 
   /**
@@ -47,7 +43,6 @@ export class InternalApiAction extends BaseThunkAction {
 
     const response = await InternalApiAction.getResponseData(
       queryConfig,
-      this.#defaultResponse,
     );
 
     if(cacheKey && requestKey){
@@ -61,10 +56,7 @@ export class InternalApiAction extends BaseThunkAction {
   }
 
 
-  static async #getErrorData(response:any, mockSettings:any, url:string){
-    console.warn(
-      "Did not retrieve data from API. Mock data will be used",
-    );
+  static async #getErrorData(response:any, url:string){
 
     let message = "";
 
@@ -79,15 +71,12 @@ export class InternalApiAction extends BaseThunkAction {
       }
     }
 
-    const responseData: any = {
+    return {
       status: response.status,
       errorMessage: message,
       endpoint: url,
     };
 
-    return mockSettings?.defaultFunction
-      ? mockSettings?.defaultFunction(responseData)
-      : InternalApiAction.#defaultApiErrorResponse(responseData);
   }
 
   /**
@@ -96,10 +85,9 @@ export class InternalApiAction extends BaseThunkAction {
    *
    * Cache data will not be used or updated.
    */
-  static async getResponseData(queryConfig: ApiRequestConfig,
-                             mockSettings?: DefaultApiAction,){
+  static async getResponseData(queryConfig: ApiRequestConfig){
     const url = queryConfig.url;
-    const useDefault = mockSettings?.defaultFunctionPriority;
+
 
     const authData = getAccessTokenIfPresent();
 
@@ -115,42 +103,33 @@ export class InternalApiAction extends BaseThunkAction {
     }
 
     try {
-      if (!useDefault) {
-        //The replace call is a workaround for an issue with url strings containing double quotes"
-        const response = await fetch(url.replace(/"/g, ""), {
-          method: queryConfig.method ?? ApiActionTypes.GET,
-          headers: queryConfig.headers,
-          body: queryConfig.body,
-        });
-        if (response.status !== 200) {
-          return await this.#getErrorData(response, mockSettings,url)
-        }
-
-        const contentType = response.headers.get("content-type");
-        if (contentType === "application/json") {
-          const result = await response.json();
-          return result;
-        }
-
-        //Clear cache because there was a likely data update.
-        if(queryConfig.method !== ApiActionTypes.GET){
-          console.log("Clearing session storage because of data update");
-          clearSessionStorage();
-        }
-        return InternalApiAction.#defaultApiSuccessResponse;
+      //The replace call is a workaround for an issue with url strings containing double quotes"
+      const response = await fetch(url.replace(/"/g, ""), {
+        method: queryConfig.method ?? ApiActionTypes.GET,
+        headers: queryConfig.headers,
+        body: queryConfig.body,
+      });
+      if (response.status !== 200) {
+        return await this.#getErrorData(response,url)
       }
+
+      const contentType = response.headers.get("content-type");
+      if (contentType === "application/json") {
+        const result = await response.json();
+        return result;
+      }
+
+      //Clear cache because there was a likely data update.
+      if(queryConfig.method !== ApiActionTypes.GET){
+        console.log("Clearing session storage because of data update");
+        clearSessionStorage();
+      }
+      return InternalApiAction.#defaultApiSuccessResponse;
+
     } catch (e: any) {
-
-      return mockSettings?.defaultFunction
-        ? mockSettings?.defaultFunction(e.message)
-        : e.message
+      return e.message;
     }
-    return mockSettings?.defaultFunction ? mockSettings.defaultFunction() : {};
   }
-
-  static #defaultApiErrorResponse = (responseData: any) => {
-    throw new Error(JSON.stringify(responseData, null, 2));
-  };
 
   static #defaultApiSuccessResponse =  () =>{
     return { status: 200 };

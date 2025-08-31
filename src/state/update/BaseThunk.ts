@@ -112,20 +112,16 @@ export class BaseThunk {
     this.subscribedComponents.splice(idx, 1);
   }
 
-  subscribeComponentToData(component:BaseDynamicComponent){
-    let oldDispatcherIndex = -1;
+  subscribeComponent(component:BaseDynamicComponent){
+
     let i = 0;
 
-    this.subscribedComponents.forEach((subscribedComponent: BaseDynamicComponent) => {
-      if(subscribedComponent === component) {
-        oldDispatcherIndex = i;
-      } else {
-        i++;
+    while(i<this.subscribedComponents.length){
+      if(this.subscribedComponents[i] === component){
+        this.subscribedComponents = this.subscribedComponents.splice(i, 1);
+        break;
       }
-    });
-
-    if (oldDispatcherIndex !== -1) {
-      this.subscribedComponents = this.subscribedComponents.splice(oldDispatcherIndex, 1);
+      i++;
     }
     this.subscribedComponents.push(component);
   }

@@ -29,7 +29,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     const self = this;
 
     globalStateSubscriptions.forEach((subscription: GlobalStateSubscription) => {
-      subscription.dataThunk.subscribeComponentToData(self)
+      subscription.dataThunk.subscribeComponent(self)
       self.#subscribedThunks.push(subscription.dataThunk);
 
       let params: Record<string, string> = subscription.params ?? {}

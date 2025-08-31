@@ -19,7 +19,6 @@ export {ApiActionTypes} from "./state/update/api/types/ApiActionTypes";
 export {InternalApiAction} from "./state/update/api/InternalApiAction";
 
 export type {ApiRequestConfig} from "./state/update/api/types/ApiRequestConfig";
-export type {DefaultApiAction} from "./state/update/api/DefaultApiAction"
 
 export {BaseThunkAction} from './state/update/BaseThunkAction';
 export * from './state/update/BaseThunk';
