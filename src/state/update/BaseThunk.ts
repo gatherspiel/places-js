@@ -39,7 +39,7 @@ export class BaseThunk {
   updateThunkState(thunkData:any){
     this.thunkData = thunkData;
     this.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
-      component.updateFromThunkState();
+      component.updateFromGlobalState();
     })
   }
 
@@ -79,7 +79,7 @@ export class BaseThunk {
         }
         //TODO: Make sure this reducer doesn't overwrite the thunk data.
         self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
-          component.updateFromThunkState();
+          component.updateFromGlobalState();
         })
       })
     }
@@ -97,7 +97,7 @@ export class BaseThunk {
 
         //TODO: Make sure this reducer doesn't overwrite the thunk data.
         self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
-          component.updateFromThunkState();
+          component.updateFromGlobalState();
         })
       });
     }

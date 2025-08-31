@@ -50,21 +50,14 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   }
 
 
-  updateData(data: any,
-             updateFunction = (data:any)=>data) {
+  updateData(data: any) {
 
     if (!data) {
       data = this.componentState
     }
 
-    const updatedData = updateFunction(data);
-    if (!updatedData) {
-      throw new Error(
-        `Update function for ${this.componentId} must return a JSON object`,
-      );
-    }
 
-    this.componentState = {...this.componentState,...freezeState(updatedData)};
+    this.componentState = {...this.componentState,...freezeState(data)};
     this.generateAndSaveHTML(this.componentState);
 
     if(this.shadowRoot){
@@ -89,16 +82,12 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     return this.componentState;
   }
 
-  hasUserEditPermissions(){
-    return this.componentState?.permissions?.userCanEdit;
-  }
-
   // @ts-ignore
   generateAndSaveHTML(data: any) {
     this.innerHTML = this.render(data);
   }
 
-  updateFromThunkState() {
+  updateFromGlobalState() {
     let dataLoaded = true;
     this.#globalStateSubscriptions.forEach((item:GlobalStateSubscription)=> {
       if(!item.dataThunk.hasThunkData()){
