@@ -49,13 +49,11 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     });
   }
 
-
   updateData(data: any) {
 
     if (!data) {
       data = this.componentState
     }
-
 
     this.componentState = {...this.componentState,...freezeState(data)};
     this.generateAndSaveHTML(this.componentState);

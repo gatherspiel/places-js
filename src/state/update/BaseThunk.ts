@@ -47,7 +47,7 @@ export class BaseThunk {
    * Retrieves data from API thunk.
    * @param params
    * @param subscribedThunk: Data thunk that will be subscribed to data updates from this thunk. This is an
-   * optional parameter that is only supported for requests that re not preloads.
+   * optional parameter that is only supported for requests that are not preloads.
    */
   getData(params:any, subscribedThunk?:BaseThunk){
 
@@ -115,7 +115,6 @@ export class BaseThunk {
   subscribeComponent(component:BaseDynamicComponent){
 
     let i = 0;
-
     while(i<this.subscribedComponents.length){
       if(this.subscribedComponents[i] === component){
         this.subscribedComponents = this.subscribedComponents.splice(i, 1);

@@ -1,4 +1,4 @@
-import {getComponent} from "../components/ComponentRegistry";
+import {getComponent} from "./ComponentRegistry";
 import {PageState} from "./PageState";
 
 import type {BaseDynamicComponent} from "../components/BaseDynamicComponent";
