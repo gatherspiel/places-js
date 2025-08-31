@@ -10,7 +10,6 @@ export {generateErrorMessage, generateSuccessMessage} from './components/utils/S
 export {BaseTemplateComponent} from './components/BaseTemplateComponent'
 export {BaseDynamicComponent} from './components/BaseDynamicComponent'
 export {BaseTemplateDynamicComponent} from './components/BaseTemplateDynamicComponent'
-export {FormSelector} from './FormSelector';
 
 export {PageState} from './spa/PageState';
 export {AbstractPageComponent} from './spa/AbstractPageComponent';

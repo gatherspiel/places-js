@@ -1,7 +1,5 @@
 import type {BaseThunk} from "../state/update/BaseThunk";
 
-import type {FormInputConfig} from "./types/FormInputConfig";
-import  {FormSelector} from "../FormSelector";
 import {getUrlParameter} from "../utils/UrlParamUtils";
 import {freezeState} from "../utils/Immutable";
 import {GlobalStateSubscription} from "./types/GlobalStateSubscription";
@@ -12,7 +10,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   #dependenciesLoaded: boolean = true;
   #globalStateSubscriptions: GlobalStateSubscription[];
-  #formSelector: FormSelector
 
   componentState: any = {};
   static instanceCount = 1;
@@ -28,7 +25,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     BaseDynamicComponent.instanceCount++;
 
     this.componentId = `${this.constructor.name}-${BaseDynamicComponent.instanceCount}`;
-    this.#formSelector = new FormSelector();
 
     const self = this;
 
@@ -72,10 +68,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     this.generateAndSaveHTML(this.componentState, this.#dependenciesLoaded);
 
     if(this.shadowRoot){
-      this.#formSelector.setShadowRoot(this.shadowRoot);
-    }
-
-    if(this.shadowRoot){
       if(this.attachEventHandlersToDom){
         this.attachEventHandlersToDom(this.shadowRoot);
       }
@@ -103,20 +95,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   // @ts-ignore
   generateAndSaveHTML(data: any, dependenciesLoaded:boolean) {
-    this.#formSelector.clearFormSelectors();
     this.innerHTML = this.render(data);
-  }
-
-  addShortInput(formConfig:FormInputConfig){
-    return this.#formSelector.generateInputFormSelector(formConfig, this);
-  }
-
-  addTextInput(formConfig:FormInputConfig){
-    return this.#formSelector.generateTextInputFormItem(formConfig);
-  }
-
-  getFormValue(id:string){
-    return this.#formSelector.getValue(id);
   }
 
   updateFromThunkState() {

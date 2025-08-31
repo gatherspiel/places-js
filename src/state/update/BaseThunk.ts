@@ -129,6 +129,4 @@ export class BaseThunk {
     }
     this.subscribedComponents.push(component);
   }
-
-
 }

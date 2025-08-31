@@ -134,16 +134,16 @@ export class InternalApiAction extends BaseThunkAction {
 
         //Clear cache because there was a likely data update.
         if(queryConfig.method !== ApiActionTypes.GET){
+          console.log("Clearing session storage because of data update");
           clearSessionStorage();
         }
         return InternalApiAction.#defaultApiSuccessResponse;
       }
     } catch (e: any) {
 
-
       return mockSettings?.defaultFunction
         ? mockSettings?.defaultFunction(e.message)
-        : JSON.parse(e.message)
+        : e.message
     }
     return mockSettings?.defaultFunction ? mockSettings.defaultFunction() : {};
   }
