@@ -54,11 +54,14 @@ export class DataStore {
     const self = this;
     let cacheKey = this.requestStoreId ?? '';
 
+    console.log("Retrieving data");
+
     //@ts-ignore
     if(this.preloadEnabled && (DataStore.finishedPreload !== "finished")) {
       let promise = new Promise(resolve=>{
         const id = setInterval(()=>{
 
+          console.log("Waiting for preload");
           // @ts-ignore
           if(window.preloadData) {
             clearInterval(id);
