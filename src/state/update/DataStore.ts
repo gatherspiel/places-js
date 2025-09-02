@@ -59,11 +59,12 @@ export class DataStore {
     //@ts-ignore
     if(this.preloadEnabled && (DataStore.finishedPreload !== "finished")) {
       let promise = new Promise(resolve=>{
+        console.log("Waiting for preload")      ;
         const id = setInterval(()=>{
 
-          console.log("Waiting for preload");
           // @ts-ignore
           if(window.preloadData) {
+            console.log("Data has been preloaded")
             clearInterval(id);
             // @ts-ignore
             resolve(window.preloadData)
