@@ -1,6 +1,5 @@
-import type {BaseThunk} from "../state/update/BaseThunk";
+import type {DataStore} from "../state/update/DataStore";
 
-import {getUrlParameter} from "../utils/UrlParamUtils";
 import {freezeState} from "../utils/Immutable";
 import {GlobalStateSubscription} from "./types/GlobalStateSubscription";
 
@@ -14,7 +13,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   componentState: any = {};
   static instanceCount = 1;
 
-  #subscribedThunks: BaseThunk[] = [];
+  #subscribedStores: DataStore[] = [];
   attachedEventsToShadowRoot:boolean = false;
 
   constructor(globalStateSubscriptions: GlobalStateSubscription[] = []) {
@@ -29,23 +28,23 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     const self = this;
 
     globalStateSubscriptions.forEach((subscription: GlobalStateSubscription) => {
-      subscription.dataThunk.subscribeComponent(self)
-      self.#subscribedThunks.push(subscription.dataThunk);
+      subscription.dataStore.subscribeComponent(self)
+      self.#subscribedStores.push(subscription.dataStore);
 
       let params: Record<string, string> = subscription.params ?? {}
       if (subscription.urlParams) {
         subscription.urlParams.forEach((name: any) => {
-          params[name] = getUrlParameter(name);
+          params[name] = (new URLSearchParams(document.location.search)).get(name) ?? "";
         })
       }
-      subscription.dataThunk.getData(params)
+      subscription.dataStore.getData(params)
     });
   }
 
   disconnectedCallback(){
     const self = this;
-    self.#subscribedThunks.forEach((thunk:BaseThunk)=>{
-      thunk.unsubscribeComponent(self)
+    self.#subscribedStores.forEach((store:DataStore)=>{
+      store.unsubscribeComponent(self)
     });
   }
 
@@ -82,13 +81,41 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   // @ts-ignore
   generateAndSaveHTML(data: any) {
-    this.innerHTML = this.render(data);
+    if (this.shadowRoot === null) {
+      this.attachShadow({ mode: "open" });
+
+      let templateStyle = this.getTemplateStyle();
+
+      const template = document.createElement("template");
+      template.innerHTML = templateStyle + `<div></div>`;
+      this.shadowRoot!.appendChild(template.content.cloneNode(true));
+    }
+
+    const div = this.shadowRoot!.querySelector("div");
+    if (div === null) {
+      throw new Error(`Did not find div when creating template component`);
+    }
+
+    if(this.showLoadingHtml && !this.#globalStateLoaded) {
+      div.innerHTML = this.showLoadingHtml();
+    }
+    else {
+      div.innerHTML = this.render(data);
+    }
   }
 
+  /*
+ - Returns CSS styles specific to the component. The string should be in the format <style> ${CSS styles} </style>
+ */
+  abstract getTemplateStyle(): string;
+
+  showLoadingHtml?():string
+
   updateFromGlobalState() {
+
     let dataLoaded = true;
     this.#globalStateSubscriptions.forEach((item:GlobalStateSubscription)=> {
-      if(!item.dataThunk.hasThunkData()){
+      if(!item.dataStore.hasStoreData()){
         dataLoaded = false;
       }
     });
@@ -103,18 +130,18 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       let dataToUpdate: any = {}
       this.#globalStateSubscriptions?.forEach((item:GlobalStateSubscription)=> {
 
-        let thunkData = item.dataThunk.getThunkData();
+        let storeData = item.dataStore.getStoreData();
         if(item.componentReducer){
-          thunkData = item.componentReducer(thunkData);
+          storeData = item.componentReducer(storeData);
         }
 
         if(item.fieldName) {
-          dataToUpdate[item.fieldName] = thunkData;
+          dataToUpdate[item.fieldName] = storeData;
         } else {
-          dataToUpdate = thunkData;
+          dataToUpdate = storeData;
           if(self.#globalStateSubscriptions?.length > 1){
-            throw new Error(`Component ${this.constructor.name} has multiple data thunks. 
-              Each one must have a specified field name`)
+            throw new Error(`Component ${this.constructor.name} is subscribed to multiple data stores. 
+              Each one must be associated with a specified field name`)
           }
         }
       })

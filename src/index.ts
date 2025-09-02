@@ -9,19 +9,18 @@ export {generateErrorMessage, generateSuccessMessage} from './components/utils/S
 
 export {BaseTemplateComponent} from './components/BaseTemplateComponent'
 export {BaseDynamicComponent} from './components/BaseDynamicComponent'
-export {BaseTemplateDynamicComponent} from './components/BaseTemplateDynamicComponent'
 
 export {PageState} from './spa/PageState';
 export {AbstractPageComponent} from './spa/AbstractPageComponent';
 
-export {generateApiThunk,generateApiThunkWithExternalConfig} from "./state/update/api/ApiThunkFactory";
+export {generateDataStore,generateDataStoreWithExternalConfig} from "./state/update/api/DataStoreFactory";
 export {ApiActionTypes} from "./state/update/api/types/ApiActionTypes";
-export {InternalApiAction} from "./state/update/api/InternalApiAction";
+export {ApiLoadAction} from "./state/update/api/ApiLoadAction";
 
 export type {ApiRequestConfig} from "./state/update/api/types/ApiRequestConfig";
 
-export {BaseThunkAction} from './state/update/BaseThunkAction';
-export * from './state/update/BaseThunk';
+export {DataStoreLoadAction} from './state/update/DataStoreLoadAction';
+export * from './state/update/DataStore';
 
 export type {DropdownConfig} from 'components/types/DropdownConfig'
 export type {DropdownConfigItem} from 'components/types/DropdownConfig'
@@ -38,5 +37,4 @@ export {
   validateAddress,
   validateDateFormat} from './utils/EventDataUtils'
 
-export {getUrlParameter} from './utils/UrlParamUtils'
 export {addLocalStorageData,deleteLocalStoreData, getLocalStorageDataIfPresent} from './state/storage/LocalStorageUtils'

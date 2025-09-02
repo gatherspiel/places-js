@@ -1,23 +1,23 @@
-import { BaseThunkAction } from "./BaseThunkAction";
+import { DataStoreLoadAction } from "./DataStoreLoadAction";
 import type {BaseDynamicComponent} from "../../components/BaseDynamicComponent";
 
-export class BaseThunk {
-  thunkAction: BaseThunkAction;
+export class DataStore {
+  loadAction: DataStoreLoadAction;
 
   subscribedComponents:BaseDynamicComponent[];
 
   requestStoreId?: string;
-  thunkData:any = null
+  storeData:any = null
 
   activeRequest:boolean = false;
 
   preloadEnabled:boolean = false;
-  constructor(dataFetch: BaseThunkAction) {
-    this.thunkAction = dataFetch;
+  constructor(dataFetch: DataStoreLoadAction) {
+    this.loadAction = dataFetch;
     this.subscribedComponents = [];
   }
 
-  createRequestStore(storeId:string){
+  setId(storeId:string){
     this.requestStoreId = storeId;
     if(!sessionStorage.getItem(this.requestStoreId)){
       sessionStorage.setItem(this.requestStoreId, JSON.stringify({}))
@@ -28,34 +28,34 @@ export class BaseThunk {
     this.preloadEnabled = true;
   }
 
-  getThunkData():any {
-    return this.thunkData;
+  getStoreData():any {
+    return this.storeData;
   }
 
-  hasThunkData():boolean {
-    return this.thunkData !== null;
+  hasStoreData():boolean {
+    return this.storeData !== null;
   }
 
-  updateThunkState(thunkData:any){
-    this.thunkData = thunkData;
+  updateStoreData(storeData:any){
+    this.storeData = storeData;
     this.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
       component.updateFromGlobalState();
     })
   }
 
   /**
-   * Retrieves data from API thunk.
+   * Retrieves data from API.
    * @param params
-   * @param subscribedThunk: Data thunk that will be subscribed to data updates from this thunk. This is an
+   * @param dataStore: Data store that will be subscribed to data updates from this store. This is an
    * optional parameter that is only supported for requests that are not preloads.
    */
-  getData(params:any, subscribedThunk?:BaseThunk){
+  getData(params:any, dataStore?:DataStore){
 
     const self = this;
     let cacheKey = this.requestStoreId ?? '';
 
     //@ts-ignore
-    if(this.preloadEnabled && (BaseThunk.finishedPreload !== "finished")) {
+    if(this.preloadEnabled && (DataStore.finishedPreload !== "finished")) {
       let promise = new Promise(resolve=>{
         const id = setInterval(()=>{
 
@@ -70,14 +70,13 @@ export class BaseThunk {
       promise.then((response:any)=>{
 
         //@ts-ignore
-        BaseThunk.finishedPreload = "finished";
+        DataStore.finishedPreload = "finished";
         self.activeRequest = false;
-        self.thunkData = response;
+        self.storeData = response;
 
-        if(subscribedThunk){
-          subscribedThunk.updateThunkState(response);
+        if(dataStore){
+          dataStore.updateStoreData(response);
         }
-        //TODO: Make sure this reducer doesn't overwrite the thunk data.
         self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
           component.updateFromGlobalState();
         })
@@ -86,16 +85,15 @@ export class BaseThunk {
     // Do not make a data request if there is an active one in progress. It will push data to subscribed components.
     else if(!this.activeRequest) {
       this.activeRequest = true;
-      this.thunkAction.retrieveData(params, cacheKey).then((response: any) => {
+      this.loadAction.fetch(params, cacheKey).then((response: any) => {
 
         self.activeRequest = false;
-        self.thunkData = response;
+        self.storeData = response;
 
-        if(subscribedThunk){
-          subscribedThunk.updateThunkState(response);
+        if(dataStore){
+          dataStore.updateStoreData(response);
         }
 
-        //TODO: Make sure this reducer doesn't overwrite the thunk data.
         self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
           component.updateFromGlobalState();
         })
@@ -106,7 +104,7 @@ export class BaseThunk {
   unsubscribeComponent(component:BaseDynamicComponent){
     const idx = this.subscribedComponents.indexOf(component);
     if(idx === -1){
-      console.warn(`Attempt to unsubscribe ${component.componentId} from thunk it is not subscribed to`)
+      console.warn(`Attempt to unsubscribe ${component.componentId} from store it is not subscribed to`)
       return;
     }
     this.subscribedComponents.splice(idx, 1);

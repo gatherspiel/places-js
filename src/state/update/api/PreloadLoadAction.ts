@@ -1,8 +1,8 @@
-import {BaseThunkAction} from "../BaseThunkAction";
+import {DataStoreLoadAction} from "../DataStoreLoadAction";
 
-export class PreloadApiAction extends BaseThunkAction{
+export class PreloadLoadAction extends DataStoreLoadAction{
 
-  async retrieveData(): Promise<any>{
+  async fetch(): Promise<any>{
 
     let promise = new Promise(resolve=>{
       const id = setInterval(()=>{

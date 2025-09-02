@@ -1,4 +1,4 @@
-import { BaseThunkAction } from "../BaseThunkAction";
+import { DataStoreLoadAction } from "../DataStoreLoadAction";
 
 import type { ApiRequestConfig } from "./types/ApiRequestConfig";
 import { ApiActionTypes } from "./types/ApiActionTypes";
@@ -8,7 +8,7 @@ import {
   updateSessionStorage
 } from "../../storage/SessionStorageUtils";
 import {getLocalStorageDataIfPresent} from "../../storage/LocalStorageUtils";
-export class InternalApiAction extends BaseThunkAction {
+export class ApiLoadAction extends DataStoreLoadAction {
   readonly #getQueryConfig: (a: any) => ApiRequestConfig;
 
   constructor(
@@ -21,7 +21,7 @@ export class InternalApiAction extends BaseThunkAction {
   /**
    * @param params
    */
-  async retrieveData(params: any, cacheKey?: string): Promise<any> {
+  async fetch(params: any, cacheKey?: string): Promise<any> {
 
     const queryConfig: ApiRequestConfig = this.#getQueryConfig(params);
 
@@ -41,7 +41,7 @@ export class InternalApiAction extends BaseThunkAction {
     }
 
 
-    const response = await InternalApiAction.getResponseData(
+    const response = await ApiLoadAction.getResponseData(
       queryConfig,
     );
 
@@ -124,7 +124,7 @@ export class InternalApiAction extends BaseThunkAction {
         console.log("Clearing session storage because of data update");
         clearSessionStorage();
       }
-      return InternalApiAction.#defaultApiSuccessResponse;
+      return ApiLoadAction.#defaultApiSuccessResponse;
 
     } catch (e: any) {
       return e.message;

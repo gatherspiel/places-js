@@ -1,7 +1,7 @@
-import type {BaseThunk} from "../../state/update/BaseThunk";
+import type {DataStore} from "../../state/update/DataStore";
 
 export type GlobalStateSubscription = {
-  dataThunk: BaseThunk;
+  dataStore: DataStore;
   fieldName?: string
   params?: any;
   urlParams?:any;

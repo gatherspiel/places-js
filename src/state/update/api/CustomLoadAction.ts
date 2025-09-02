@@ -1,6 +1,6 @@
-import { BaseThunkAction } from "../BaseThunkAction";
+import { DataStoreLoadAction } from "../DataStoreLoadAction";
 
-export class ExternalApiAction extends BaseThunkAction {
+export class CustomLoadAction extends DataStoreLoadAction {
 
   #externalClient: (params: any) => any;
   constructor(
@@ -10,8 +10,8 @@ export class ExternalApiAction extends BaseThunkAction {
     this.#externalClient = externalClient;
   }
 
-  async retrieveData(params: any): Promise<any> {
-    const externalRequest: ExternalApiAction = this;
+  async fetch(params: any): Promise<any> {
+    const externalRequest: CustomLoadAction = this;
 
     return await externalRequest.#externalClient(
       params,
