@@ -4,14 +4,10 @@ export type {GlobalStateSubscription} from './components/types/GlobalStateSubscr
 export {clearSessionStorage} from './state/storage/SessionStorageUtils'
 
 export * from './components/types/GlobalStateSubscription';
-export {serializeJSONProp,deserializeJSONProp} from './components/utils/ComponentUtils';
 export {generateErrorMessage, generateSuccessMessage} from './components/utils/StatusIndicators';
 
 export {BaseTemplateComponent} from './components/BaseTemplateComponent'
 export {BaseDynamicComponent} from './components/BaseDynamicComponent'
-
-export {PageState} from './spa/PageState';
-export {AbstractPageComponent} from './spa/AbstractPageComponent';
 
 export {generateDataStore,generateDataStoreWithExternalConfig} from "./state/update/api/DataStoreFactory";
 export {ApiActionTypes} from "./state/update/api/types/ApiActionTypes";
