@@ -1,7 +1,7 @@
 import type {DataStore} from "../state/update/DataStore";
 
 import {freezeState} from "../utils/Immutable";
-import {GlobalStateSubscription} from "./types/GlobalStateSubscription";
+import {GlobalStateSubscription} from "./GlobalStateSubscription";
 
 export abstract class BaseDynamicComponent extends HTMLElement {
 

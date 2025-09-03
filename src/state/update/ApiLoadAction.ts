@@ -1,4 +1,4 @@
-import { DataStoreLoadAction } from "../DataStoreLoadAction";
+import { DataStoreLoadAction } from "./DataStoreLoadAction";
 
 import type { ApiRequestConfig } from "./types/ApiRequestConfig";
 import { ApiActionTypes } from "./types/ApiActionTypes";
@@ -6,8 +6,8 @@ import {
   clearSessionStorage,
   getItemFromSessionStorage,
   updateSessionStorage
-} from "../../storage/SessionStorageUtils";
-import {getLocalStorageDataIfPresent} from "../../storage/LocalStorageUtils";
+} from "../../utils/SessionStorageUtils";
+import {getLocalStorageDataIfPresent} from "../../utils/LocalStorageUtils";
 export class ApiLoadAction extends DataStoreLoadAction {
   readonly #getQueryConfig: (a: any) => ApiRequestConfig;
 

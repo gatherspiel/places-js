@@ -1,4 +1,4 @@
-import { DataStore } from "../DataStore";
+import { DataStore } from "./DataStore";
 import { CustomLoadAction } from "./CustomLoadAction";
 import { ApiLoadAction } from "./ApiLoadAction";
 import type { ApiRequestConfig } from "./types/ApiRequestConfig";

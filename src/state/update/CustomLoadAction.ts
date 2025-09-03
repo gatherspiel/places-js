@@ -1,4 +1,4 @@
-import { DataStoreLoadAction } from "../DataStoreLoadAction";
+import { DataStoreLoadAction } from "./DataStoreLoadAction";
 
 export class CustomLoadAction extends DataStoreLoadAction {
 
