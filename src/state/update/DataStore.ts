@@ -1,126 +1,91 @@
 import { DataStoreLoadAction } from "./DataStoreLoadAction";
-import type {BaseDynamicComponent} from "../../components/BaseDynamicComponent";
+import type {BaseDynamicComponent} from "../../BaseDynamicComponent";
 
 export class DataStore {
-  loadAction: DataStoreLoadAction;
 
-  subscribedComponents:BaseDynamicComponent[];
+  static #storeCount = 0;
 
-  requestStoreId?: string;
-  storeData:any = null
+  #activeRequest:boolean = false;
+  #loadAction: DataStoreLoadAction;
+  #storeData:any = null
+  #subscribedComponents:BaseDynamicComponent[];
 
-  activeRequest:boolean = false;
+  readonly #requestStoreId?: string;
 
-  preloadEnabled:boolean = false;
   constructor(dataFetch: DataStoreLoadAction) {
-    this.loadAction = dataFetch;
-    this.subscribedComponents = [];
-  }
+    this.#loadAction = dataFetch;
+    this.#subscribedComponents = [];
 
-  setId(storeId:string){
-    this.requestStoreId = storeId;
-    if(!sessionStorage.getItem(this.requestStoreId)){
-      sessionStorage.setItem(this.requestStoreId, JSON.stringify({}))
-    }
-  }
+    this.#requestStoreId = `data-store-${DataStore.#storeCount}`;
+    sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}))
 
-  enablePreload(){
-    this.preloadEnabled = true;
+    DataStore.#storeCount++;
   }
 
   getStoreData():any {
-    return this.storeData;
+    return this.#storeData;
   }
 
   hasStoreData():boolean {
-    return this.storeData !== null;
+    return this.#storeData !== null;
   }
 
   updateStoreData(storeData:any){
-    this.storeData = storeData;
-    this.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
-      component.updateFromGlobalState();
+    this.#storeData = storeData;
+    this.#subscribedComponents.forEach((component:BaseDynamicComponent)=>{
+      component.updateFromDataStore();
     })
   }
 
   /**
    * Retrieves data from API.
    * @param params
-   * @param dataStore: Data store that will be subscribed to data updates from this store. This is an
-   * optional parameter that is only supported for requests that are not preloads.
+   * @param dataStore: Optional data store that will be subscribed to updates from this store.
    */
-  getData(params:any, dataStore?:DataStore){
+  fetchData(params:any, dataStore?:DataStore){
 
     const self = this;
-    let cacheKey = this.requestStoreId ?? '';
+    let cacheKey = this.#requestStoreId ?? ''
 
 
-    //@ts-ignore
-    if(this.preloadEnabled && (DataStore.finishedPreload !== "finished")) {
-      let promise = new Promise(resolve=>{
-        const id = setInterval(()=>{
-
-          // @ts-ignore
-          if(window.preloadData) {
-            clearInterval(id);
-            // @ts-ignore
-            resolve(window.preloadData)
-          }
-        },10)
-      });
-      promise.then((response:any)=>{
-
-        //@ts-ignore
-        DataStore.finishedPreload = "finished";
-        self.activeRequest = false;
-        self.storeData = response;
-
-        if(dataStore){
-          dataStore.updateStoreData(response);
-        }
-        self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
-          component.updateFromGlobalState();
-        })
-      })
-    }
     // Do not make a data request if there is an active one in progress. It will push data to subscribed components.
-    else if(!this.activeRequest) {
-      this.activeRequest = true;
-      this.loadAction.fetch(params, cacheKey).then((response: any) => {
+    if(!this.#activeRequest) {
+      this.#activeRequest = true;
+      this.#loadAction.fetch(params, cacheKey).then((response: any) => {
 
-        self.activeRequest = false;
-        self.storeData = response;
+        self.#activeRequest = false;
+        self.#storeData = response;
 
         if(dataStore){
           dataStore.updateStoreData(response);
         }
 
-        self.subscribedComponents.forEach((component:BaseDynamicComponent)=>{
-          component.updateFromGlobalState();
+        self.#subscribedComponents.forEach((component:BaseDynamicComponent)=>{
+          component.updateFromDataStore();
         })
       });
     }
   }
 
   unsubscribeComponent(component:BaseDynamicComponent){
-    const idx = this.subscribedComponents.indexOf(component);
+    const idx = this.#subscribedComponents.indexOf(component);
     if(idx === -1){
-      console.warn(`Attempt to unsubscribe ${component.componentId} from store it is not subscribed to`)
+      console.warn(`Attempt to unsubscribe ${component.constructor.name} from store it is not subscribed to`)
       return;
     }
-    this.subscribedComponents.splice(idx, 1);
+    this.#subscribedComponents.splice(idx, 1);
   }
 
   subscribeComponent(component:BaseDynamicComponent){
 
     let i = 0;
-    while(i<this.subscribedComponents.length){
-      if(this.subscribedComponents[i] === component){
-        this.subscribedComponents = this.subscribedComponents.splice(i, 1);
+    while(i<this.#subscribedComponents.length){
+      if(this.#subscribedComponents[i] === component){
+        this.#subscribedComponents = this.#subscribedComponents.splice(i, 1);
         break;
       }
       i++;
     }
-    this.subscribedComponents.push(component);
+    this.#subscribedComponents.push(component);
   }
 }

@@ -2,7 +2,8 @@ import { DataStoreLoadAction } from "./DataStoreLoadAction";
 
 export class CustomLoadAction extends DataStoreLoadAction {
 
-  #externalClient: (params: any) => any;
+  readonly #externalClient: (params: any) => any;
+
   constructor(
     externalClient: (params: any) => any,
   ) {

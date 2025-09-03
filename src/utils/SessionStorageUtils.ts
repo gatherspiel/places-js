@@ -14,7 +14,7 @@ export function getItemFromSessionStorage(requestStoreName:string, requestData: 
 
   const data = JSON.parse(dataStr);
 
-  if(!(Object.keys(data).length ===0) && requestData in data){
+  if(!(Object.keys(data).length === 0) && requestData in data){
     return data[requestData];
   }
   return null;

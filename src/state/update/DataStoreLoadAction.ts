@@ -1,10 +1,3 @@
-export class DataStoreLoadAction {
-
-  constructor() {
-
-  }
-
-  fetch(params: any, cacheKey?: string):any {
-    return {"status":"Done"}
-  };
+export abstract class DataStoreLoadAction {
+  abstract fetch(params: any, cacheKey?: string):any
 }

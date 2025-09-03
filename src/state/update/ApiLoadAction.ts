@@ -9,6 +9,7 @@ import {
 } from "../../utils/SessionStorageUtils";
 import {getLocalStorageDataIfPresent} from "../../utils/LocalStorageUtils";
 export class ApiLoadAction extends DataStoreLoadAction {
+
   readonly #getQueryConfig: (a: any) => ApiRequestConfig;
 
   constructor(
@@ -86,13 +87,11 @@ export class ApiLoadAction extends DataStoreLoadAction {
    * Cache data will not be used or updated.
    */
   static async getResponseData(queryConfig: ApiRequestConfig){
+
     const url = queryConfig.url;
-
-
     const authData = getLocalStorageDataIfPresent("access_token")?.access_token
 
     if (authData) {
-
       if(queryConfig.headers){
         queryConfig.headers["authToken"] = authData;
       } else {
@@ -115,8 +114,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
 
       const contentType = response.headers.get("content-type");
       if (contentType === "application/json") {
-        const result = await response.json();
-        return result;
+        return await response.json();
       }
 
       //Clear cache because there was a likely data update.
@@ -134,6 +132,5 @@ export class ApiLoadAction extends DataStoreLoadAction {
   static #defaultApiSuccessResponse =  () =>{
     return { status: 200 };
   };
-
 
 }

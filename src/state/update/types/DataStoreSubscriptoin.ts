@@ -1,6 +1,6 @@
-import type {DataStore} from "../state/update/DataStore";
+import type {DataStore} from "../DataStore";
 
-export type GlobalStateSubscription = {
+export type DataStoreSubscription = {
   dataStore: DataStore;
   fieldName?: string
   params?: any;
