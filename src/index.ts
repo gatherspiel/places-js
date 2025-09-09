@@ -1,6 +1,7 @@
 export {clearSessionStorage} from './utils/SessionStorageUtils'
 
 export {BaseDynamicComponent} from './BaseDynamicComponent'
+export {BaseTemplateComponent} from './BaseTemplateComponent'
 
 export {ApiLoadAction} from "./state/update/ApiLoadAction";
 export {CustomLoadAction} from "./state/update/CustomLoadAction"
