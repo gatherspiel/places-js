@@ -106,9 +106,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   #generateAndSaveHTML(data: any) {
     if (this.shadowRoot === null) {
       this.attachShadow({ mode: "open" });
-
-      let templateStyle = this.getTemplateStyle();
-
       const template = document.createElement("template");
       this.shadowRoot!.appendChild(template.content.cloneNode(true));
     }
@@ -129,6 +126,11 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     return Object.freeze(state);
   }
 
+  /**
+   * Override this method to attach events to DOM elements inside the component
+   * @param shadowRoot
+   * @protected
+   */
   protected attachEventHandlersToDom?(shadowRoot?:any):any
 
   /*

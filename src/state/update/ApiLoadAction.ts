@@ -125,7 +125,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
       return ApiLoadAction.#defaultApiSuccessResponse;
 
     } catch (e: any) {
-      return e.message;
+      return {errorMessage:e.message};
     }
   }
 
