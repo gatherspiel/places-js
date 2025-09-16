@@ -21,6 +21,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
 
   /**
    * @param params
+   * @param cacheKey
    */
   async fetch(params: any, cacheKey?: string): Promise<any> {
 
@@ -41,7 +42,6 @@ export class ApiLoadAction extends DataStoreLoadAction {
       queryConfig.headers = {};
     }
 
-
     const response = await ApiLoadAction.getResponseData(
       queryConfig,
     );
@@ -52,14 +52,13 @@ export class ApiLoadAction extends DataStoreLoadAction {
       }
       updateSessionStorage(cacheKey, requestKey, response)
     }
-
     return response;
   }
 
 
   static async #getErrorData(response:any, url:string){
 
-    let message = "";
+    let message;
 
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
@@ -77,7 +76,6 @@ export class ApiLoadAction extends DataStoreLoadAction {
       errorMessage: message,
       endpoint: url,
     };
-
   }
 
   /**
@@ -88,8 +86,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
    */
   static async getResponseData(queryConfig: ApiRequestConfig){
 
-    const url = queryConfig.url;
-    const authData = getLocalStorageDataIfPresent("access_token")?.access_token
+    const authData = getLocalStorageDataIfPresent("authToken")?.access_token
 
     if (authData) {
       if(queryConfig.headers){
@@ -103,13 +100,13 @@ export class ApiLoadAction extends DataStoreLoadAction {
 
     try {
       //The replace call is a workaround for an issue with url strings containing double quotes"
-      const response = await fetch(url.replace(/"/g, ""), {
+      const response = await fetch(queryConfig.url.replace(/"/g, ""), {
         method: queryConfig.method ?? ApiActionTypes.GET,
         headers: queryConfig.headers,
         body: queryConfig.body,
       });
       if (response.status !== 200) {
-        return await this.#getErrorData(response,url)
+        return await this.#getErrorData(response,queryConfig.url)
       }
 
       const contentType = response.headers.get("content-type");
@@ -132,5 +129,4 @@ export class ApiLoadAction extends DataStoreLoadAction {
   static #defaultApiSuccessResponse =  () =>{
     return { status: 200 };
   };
-
 }

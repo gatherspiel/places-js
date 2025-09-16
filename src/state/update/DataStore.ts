@@ -12,8 +12,8 @@ export class DataStore {
 
   readonly #requestStoreId?: string;
 
-  constructor(dataFetch: DataStoreLoadAction) {
-    this.#loadAction = dataFetch;
+  constructor(loadAction: DataStoreLoadAction) {
+    this.#loadAction = loadAction;
     this.#subscribedComponents = [];
 
     this.#requestStoreId = `data-store-${DataStore.#storeCount}`;

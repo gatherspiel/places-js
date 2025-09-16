@@ -14,7 +14,7 @@ export abstract class BaseTemplateComponent extends HTMLElement {
 
     const div = this.shadowRoot?.querySelector("div");
     if (!div) {
-      throw new Error("template must be defined with a <div></div> tag");
+      throw new Error("Failed to create template with a <div></div> section");
     }
 
     div.innerHTML = this.render();

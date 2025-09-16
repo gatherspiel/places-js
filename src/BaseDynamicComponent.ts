@@ -3,7 +3,7 @@ import {DataStoreSubscription} from "./state/update/types/DataStoreSubscriptoin"
 
 export abstract class BaseDynamicComponent extends HTMLElement {
 
-  #dataStoreLoaded: boolean = false;
+  #dataStoresLoaded: boolean = false;
   #dataStoreSubscriptions: DataStoreSubscription[];
 
   componentStore: any = {};
@@ -41,25 +41,18 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   protected updateData(data: any) {
 
     if (!data) {
-      data = this.componentStore
+      data = this.componentStore;
     }
 
     this.componentStore = {...this.componentStore,...this.#freezeComponentState(data)};
     this.#generateAndSaveHTML(this.componentStore);
 
     if(this.shadowRoot){
-      if(this.attachEventHandlersToDom){
-        this.attachEventHandlersToDom(this.shadowRoot);
-      }
-      if(this.attachEventsToShadowRoot && !this.#attachedEventsToShadowRoot){
-        this.attachEventsToShadowRoot(this.shadowRoot);
+      if(this.attachHandlersToShadowRoot && !this.#attachedEventsToShadowRoot){
+        this.attachHandlersToShadowRoot(this.shadowRoot);
         this.#attachedEventsToShadowRoot = true;
       }
     }
-  }
-
-  protected getComponentStore(){
-    return this.componentStore;
   }
 
   updateFromDataStore() {
@@ -72,11 +65,11 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     });
 
     if(dataLoaded){
-      this.#dataStoreLoaded = true;
+      this.#dataStoresLoaded = true;
     }
 
     const self = this;
-    if(this.#dataStoreLoaded){
+    if(this.#dataStoresLoaded){
 
       let dataToUpdate: any = {}
       this.#dataStoreSubscriptions?.forEach((item:DataStoreSubscription)=> {
@@ -126,17 +119,10 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     return Object.freeze(state);
   }
 
-  /**
-   * Override this method to attach events to DOM elements inside the component
-   * @param shadowRoot
-   * @protected
-   */
-  protected attachEventHandlersToDom?(shadowRoot?:any):any
-
   /*
-    Override this method to attach events to the component shadow root.
+    Override this method to attach event handlers to the component shadow root.
    */
-  protected attachEventsToShadowRoot?(shadowRoot:any):any
+  protected attachHandlersToShadowRoot?(shadowRoot:ShadowRoot):any
 
   protected abstract render(data: any): string;
 
