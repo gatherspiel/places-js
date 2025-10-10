@@ -17,6 +17,8 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     this.#dataStoreSubscriptions = dataStoreSubscriptions;
 
     const self = this;
+
+    let dataLoaded = true;
     dataStoreSubscriptions.forEach((subscription: DataStoreSubscription) => {
       subscription.dataStore.subscribeComponent(self)
       self.#subscribedStores.push(subscription.dataStore);
@@ -27,8 +29,16 @@ export abstract class BaseDynamicComponent extends HTMLElement {
           params[name] = (new URLSearchParams(document.location.search)).get(name) ?? "";
         })
       }
-      subscription.dataStore.fetchData(params)
+
+      if(!subscription.dataStore.hasStoreData()){
+        dataLoaded = false
+        subscription.dataStore.fetchData(params)
+      }
     });
+
+    if(dataLoaded){
+      this.updateFromDataStore();
+    }
   }
 
   disconnectedCallback(){
