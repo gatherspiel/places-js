@@ -27,7 +27,7 @@ export class DataStore {
   }
 
   hasStoreData():boolean {
-    return this.#storeData !== null;
+    return this.#storeData !== null && this.#storeData !== undefined;
   }
 
   updateStoreData(storeData:any){
@@ -46,7 +46,6 @@ export class DataStore {
 
     const self = this;
     let cacheKey = this.#requestStoreId ?? ''
-
 
     // Do not make a data request if there is an active one in progress. It will push data to subscribed components.
     if(!this.#activeRequest) {
