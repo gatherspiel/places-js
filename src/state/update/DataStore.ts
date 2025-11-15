@@ -55,7 +55,7 @@ export class DataStore {
    * @param params Parameters for the request.
    * @param dataStore {DataStore}: Optional data store that will be subscribed to updates from this store.
    */
-  fetchData(params:ApiRequestConfig, dataStore?:DataStore){
+  fetchData(params:any, dataStore?:DataStore){
 
     const self = this;
 
