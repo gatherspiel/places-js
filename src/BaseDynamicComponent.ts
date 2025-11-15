@@ -1,29 +1,26 @@
-import type {DataStore} from "./state/update/DataStore";
-import {DataStoreSubscription} from "./state/update/types/DataStoreSubscriptoin";
+import {DataStoreSubscription} from "./state/update/types/DataStoreSubscription";
+import {freezeState} from "./state/StateUtils";
 
 export abstract class BaseDynamicComponent extends HTMLElement {
 
-  #dataStoresLoaded: boolean = false;
-  #dataStoreSubscriptions: DataStoreSubscription[];
+  #attachedEventsToShadowRoot:boolean = false;
+  #subscribedStoresHaveData: boolean = false;
+  #subscribedStores: DataStoreSubscription[];
 
   componentStore: any = {};
-  #subscribedStores: DataStore[] = [];
-
-  #attachedEventsToShadowRoot:boolean = false;
 
   protected constructor(dataStoreSubscriptions: DataStoreSubscription[] = []) {
     super();
 
-    this.#dataStoreSubscriptions = dataStoreSubscriptions;
+    this.#subscribedStores = dataStoreSubscriptions;
 
     const self = this;
 
-    let dataLoaded = true;
+    let subscribedStoresHaveData = true;
     dataStoreSubscriptions.forEach((subscription: DataStoreSubscription) => {
       subscription.dataStore.subscribeComponent(self)
-      self.#subscribedStores.push(subscription.dataStore);
 
-      let params: Record<string, string> = subscription.params ?? {}
+      let params: any = subscription.params ?? {}
       if (subscription.urlParams) {
         subscription.urlParams.forEach((name: any) => {
           params[name] = (new URLSearchParams(document.location.search)).get(name) ?? "";
@@ -31,30 +28,30 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       }
 
       if(!subscription.dataStore.hasStoreData()){
-        dataLoaded = false
+        subscribedStoresHaveData = false
         subscription.dataStore.fetchData(params)
       }
     });
 
-    if(dataLoaded){
-      this.updateFromDataStore();
+    if(subscribedStoresHaveData){
+      this.updateFromSubscribedStores();
     }
   }
 
   disconnectedCallback(){
     const self = this;
-    self.#subscribedStores.forEach((store:DataStore)=>{
-      store.unsubscribeComponent(self)
-    });
+    self.#subscribedStores.forEach((subscription:DataStoreSubscription)=>{
+      subscription.dataStore.unsubscribeComponent(self);
+    })
   }
 
-  protected updateData(data: any) {
+  protected updateData(storeUpdates: any) {
 
-    if (!data) {
-      data = this.componentStore;
+    if (!storeUpdates) {
+      storeUpdates = this.componentStore;
     }
 
-    this.componentStore = {...this.componentStore,...this.#freezeComponentState(data)};
+    this.componentStore = {...this.componentStore,...freezeState(storeUpdates)};
     this.#generateAndSaveHTML(this.componentStore);
 
     if(this.shadowRoot){
@@ -65,24 +62,24 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     }
   }
 
-  updateFromDataStore() {
+  updateFromSubscribedStores() {
 
-    let dataLoaded = true;
-    this.#dataStoreSubscriptions.forEach((item:DataStoreSubscription)=> {
+    let subscribedStoresHaveData = true;
+    this.#subscribedStores.forEach((item:DataStoreSubscription)=> {
       if(!item.dataStore.hasStoreData()){
-        dataLoaded = false;
+        subscribedStoresHaveData = false;
       }
     });
 
-    if(dataLoaded){
-      this.#dataStoresLoaded = true;
+    if(subscribedStoresHaveData){
+      this.#subscribedStoresHaveData = true;
     }
 
     const self = this;
-    if(this.#dataStoresLoaded){
+    if(this.#subscribedStoresHaveData){
 
       let dataToUpdate: any = {}
-      this.#dataStoreSubscriptions?.forEach((item:DataStoreSubscription)=> {
+      this.#subscribedStores?.forEach((item:DataStoreSubscription)=> {
 
         let storeData = item.dataStore.getStoreData();
         if(item.componentReducer){
@@ -93,7 +90,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
           dataToUpdate[item.fieldName] = storeData;
         } else {
           dataToUpdate = storeData;
-          if(self.#dataStoreSubscriptions?.length > 1){
+          if(self.#subscribedStores?.length > 1){
             throw new Error(`Component ${this.constructor.name} is subscribed to multiple data stores. 
               Each one must be associated with a specified field name`)
           }
@@ -115,18 +112,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
     // @ts-ignore
     this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
-  }
-
-  #freezeComponentState(state:any){
-    if(!state || JSON.stringify(state)==='{}'){
-      return {};
-    }
-    for (let [key, value] of Object.entries(state)) {
-      if (state.hasOwnProperty(key) && typeof value == "object") {
-        this.#freezeComponentState(value);
-      }
-    }
-    return Object.freeze(state);
   }
 
   /*

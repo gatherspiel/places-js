@@ -1,4 +1,4 @@
-export const ApiActionTypes = Object.freeze({
+export const ApiActionType = Object.freeze({
   GET: "GET",
   POST: "POST",
   PUT: "PUT",

@@ -1,38 +1,42 @@
 import { DataStoreLoadAction } from "./DataStoreLoadAction";
 
 import type { ApiRequestConfig } from "./types/ApiRequestConfig";
-import { ApiActionTypes } from "./types/ApiActionTypes";
+import { ApiActionType } from "./types/ApiActionType";
 import {
   clearSessionStorage,
   getItemFromSessionStorage,
   updateSessionStorage
 } from "../../utils/SessionStorageUtils";
 import {getLocalStorageDataIfPresent} from "../../utils/LocalStorageUtils";
+import {ApiResponseData} from "./types/ApiResponseData";
+
+/**
+ * Class to define a data store load action through an API call.
+ */
 export class ApiLoadAction extends DataStoreLoadAction {
 
-  readonly #getQueryConfig: (a: any) => ApiRequestConfig;
+  readonly #getRequestConfig: (a: any) => ApiRequestConfig;
 
   constructor(
-    getQueryConfig: (a: any) => ApiRequestConfig,
+    getRequestConfig: (a: any) => ApiRequestConfig,
   ) {
     super();
-    this.#getQueryConfig = getQueryConfig;
+    this.#getRequestConfig = getRequestConfig;
   }
 
   /**
-   * @param params
+   * @param params API request parameters
    * @param cacheKey
    */
-  async fetch(params: any, cacheKey?: string): Promise<any> {
+  async fetch(params: ApiRequestConfig, cacheKey?: string): Promise<ApiResponseData> {
 
-    const queryConfig: ApiRequestConfig = this.#getQueryConfig(params);
+    const queryConfig: ApiRequestConfig = this.#getRequestConfig(params);
 
     let requestKey = ''
     if(cacheKey && cacheKey.length > 0){
       requestKey = `${queryConfig.method ?? ''}_${queryConfig.url}_${JSON.stringify(queryConfig.body) ?? ''}`;
 
       const cachedResponse = getItemFromSessionStorage(cacheKey, requestKey);
-
       if(cachedResponse){
         return cachedResponse;
       }
@@ -47,7 +51,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
     );
 
     if(cacheKey && requestKey){
-      if(queryConfig.method && queryConfig.method !== ApiActionTypes.GET){
+      if(queryConfig.method && queryConfig.method !== ApiActionType.GET){
         clearSessionStorage();
       }
       updateSessionStorage(cacheKey, requestKey, response)
@@ -55,8 +59,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
     return response;
   }
 
-
-  static async #getErrorData(response:any, url:string){
+  static async #getErrorData(response:any, url:string): Promise<ApiResponseData> {
 
     let message;
 
@@ -81,10 +84,11 @@ export class ApiLoadAction extends DataStoreLoadAction {
   /**
    * Directly make an API request and return the data. Use this method if the API request needs
    * to be run as part of an event handler and no other components subscribe to the request.
-   *
    * Cache data will not be used or updated.
+   *
+   * @param {ApiRequestConfig} queryConfig Configuration of the API request.
    */
-  static async getResponseData(queryConfig: ApiRequestConfig){
+  static async getResponseData(queryConfig: ApiRequestConfig): Promise<ApiResponseData>{
 
     const authData = getLocalStorageDataIfPresent("authToken")?.access_token
 
@@ -101,10 +105,11 @@ export class ApiLoadAction extends DataStoreLoadAction {
     try {
       //The replace call is a workaround for an issue with url strings containing double quotes"
       const response = await fetch(queryConfig.url.replace(/"/g, ""), {
-        method: queryConfig.method ?? ApiActionTypes.GET,
+        method: queryConfig.method ?? ApiActionType.GET,
         headers: queryConfig.headers,
         body: queryConfig.body,
       });
+
       if (response.status !== 200) {
         return await this.#getErrorData(response,queryConfig.url)
       }
@@ -115,18 +120,15 @@ export class ApiLoadAction extends DataStoreLoadAction {
       }
 
       //Clear cache because there was a likely data update.
-      if(queryConfig.method !== ApiActionTypes.GET){
-        console.log("Clearing session storage because of data update");
+      if(queryConfig.method !== ApiActionType.GET){
+        console.log("Clearing response cache and other data in session storage");
         clearSessionStorage();
       }
-      return ApiLoadAction.#defaultApiSuccessResponse;
+      return { status: 200 };
 
     } catch (e: any) {
       return {errorMessage:e.message};
     }
   }
 
-  static #defaultApiSuccessResponse =  () =>{
-    return { status: 200 };
-  };
 }

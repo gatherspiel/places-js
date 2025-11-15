@@ -6,6 +6,7 @@ export function getLocalStorageDataIfPresent(key: string): any {
 export function addLocalStorageData(key:string, data:any){
   window.localStorage.setItem(key, data);
 }
+
 export function deleteLocalStoreData(key: string){
   if(window.localStorage.getItem(key)){
     window.localStorage.removeItem(key);
