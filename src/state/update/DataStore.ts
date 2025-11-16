@@ -1,6 +1,5 @@
 import { DataStoreLoadAction } from "./DataStoreLoadAction";
 import type {BaseDynamicComponent} from "../../BaseDynamicComponent";
-import {ApiRequestConfig} from "./types/ApiRequestConfig";
 import {freezeState} from "../StateUtils";
 
 export class DataStore {
@@ -55,7 +54,7 @@ export class DataStore {
    * @param params Parameters for the request.
    * @param dataStore {DataStore}: Optional data store that will be subscribed to updates from this store.
    */
-  fetchData(params:any, dataStore?:DataStore){
+  fetchData(params:any = {}, dataStore?:DataStore){
 
     const self = this;
 
@@ -72,7 +71,9 @@ export class DataStore {
         }
 
         self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
-          component.updateFromSubscribedStores();
+          if(component.allSubscribedStoresHaveData()){
+            component.updateFromSubscribedStores();
+          }
         })
       });
     }
@@ -98,5 +99,9 @@ export class DataStore {
       i++;
     }
     this.#componentSubscriptions.push(component);
+
+    if(!this.hasStoreData()){
+      this.fetchData();
+    }
   }
 }
