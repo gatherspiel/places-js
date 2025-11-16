@@ -7,10 +7,10 @@ export class DataStore {
   static #storeCount = 0;
 
   #isFetchRequestActive:boolean = false;
-  #loadAction: DataStoreLoadAction;
   #storeData:any = null
   #componentSubscriptions:BaseDynamicComponent[];
 
+  readonly #loadAction: DataStoreLoadAction;
   readonly #requestStoreId?: string;
 
   constructor(loadAction: DataStoreLoadAction) {
@@ -61,6 +61,7 @@ export class DataStore {
     // Do not make a data request if there is an active one in progress. It will push data to subscribed components.
     if(!this.#isFetchRequestActive) {
       this.#isFetchRequestActive = true;
+
       this.#loadAction.fetch(params, self.#requestStoreId).then((response: any) => {
 
         self.#isFetchRequestActive = false;
