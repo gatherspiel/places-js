@@ -10,8 +10,10 @@ export * from './state/update/types/DataStoreSubscription';
 export {DataStoreLoadAction} from './state/update/DataStoreLoadAction';
 export * from './state/update/DataStore';
 
-export type {DataStoreSubscription} from './state/update/types/DataStoreSubscription';
 export type {ApiRequestConfig} from "./state/update/types/ApiRequestConfig";
+export type {DataStoreSubscription} from './state/update/types/DataStoreSubscription';
+export type {LoadingIndicatorConfig} from './state/update/types/LoadingIndicatorConfig';
+
 export {ApiActionType} from "./state/update/types/ApiActionType";
 
 export {addLocalStorageData,deleteLocalStoreData, getLocalStorageDataIfPresent} from './utils/LocalStorageUtils'
