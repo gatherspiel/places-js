@@ -58,7 +58,7 @@ export class DataStore {
    * @param params Parameters for the request.
    * @param dataStore {DataStore}: Optional data store that will be subscribed to updates from this store.
    */
-  fetchData(params:any = {}, dataStore?:DataStore){
+  async fetchData(params:any = {}, dataStore?:DataStore){
 
     const self = this;
 
@@ -76,21 +76,21 @@ export class DataStore {
         })
       }
 
-      this.#loadAction.fetch(params, self.#requestStoreId).then((response: any) => {
+     const response = await this.#loadAction.fetch(params, self.#requestStoreId)
 
-        self.#isLoading = false;
-        self.#storeData = response;
+      self.#isLoading = false;
+      self.#storeData = response;
 
-        self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
-          component.unlockComponent(self);
-          component.updateFromSubscribedStores();
-        })
+      self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
+        component.unlockComponent(self);
+        component.updateFromSubscribedStores();
+      })
 
-        if(dataStore){
-          dataStore.updateStoreData(response);
-        }
+      if(dataStore){
+        dataStore.updateStoreData(response);
+      }
 
-      });
+      return response;
     }
   }
 

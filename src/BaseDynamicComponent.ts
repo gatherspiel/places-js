@@ -33,7 +33,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   }
 
   lockComponent(dataStore:DataStore){
-    
+
     if(!this.#loadingFromStores.has(dataStore)){
       this.#loadingFromStores.add(dataStore);
     } else {
@@ -138,7 +138,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       this.shadowRoot!.appendChild(template.content.cloneNode(true));
     }
 
-    console.log(this.#loadingStarted);
     if(this.#loadingStarted > 0){
       const current = Date.now();
       const loadTime = current - this.#loadingStarted;
