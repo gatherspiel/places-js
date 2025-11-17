@@ -35,7 +35,7 @@ export class DataStore {
    * @returns {boolean} false if the data in the store is null or undefined and is not in a loading state true otherwise.
    */
   isWaitingForData():boolean {
-    return this.#storeData !== null && this.#storeData !== undefined  && !this.isWaitingForData();
+    return this.#storeData !== null && this.#storeData !== undefined  && !this.#isLoading;
   }
 
   /**
@@ -47,6 +47,10 @@ export class DataStore {
     this.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
       component.updateFromSubscribedStores();
     })
+  }
+
+  protected getSubscribedComponents(){
+    return this.#componentSubscriptions;
   }
 
   /**
@@ -66,6 +70,11 @@ export class DataStore {
       self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
         component.lockComponent(self);
       })
+      if(dataStore){
+        dataStore.getSubscribedComponents().forEach((component:BaseDynamicComponent)=>{
+          component.lockComponent(self);
+        })
+      }
 
       this.#loadAction.fetch(params, self.#requestStoreId).then((response: any) => {
 
@@ -73,8 +82,8 @@ export class DataStore {
         self.#storeData = response;
 
         self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
-          component.updateFromSubscribedStores();
           component.unlockComponent(self);
+          component.updateFromSubscribedStores();
         })
 
         if(dataStore){

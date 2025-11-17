@@ -7,6 +7,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   #attachedEventsToShadowRoot:boolean = false;
 
+  #componentIsRendering:boolean = false;
   #loadingFromStores = new Set();
   #loadingStarted:number = 0;
 
@@ -32,11 +33,11 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   }
 
   lockComponent(dataStore:DataStore){
-
+    
     if(!this.#loadingFromStores.has(dataStore)){
       this.#loadingFromStores.add(dataStore);
     } else {
-      console.warn("Attempting to lock component multiple times");
+      console.warn(`Attempting to lock component ${this.constructor.name} multiple times`);
     }
 
     if(this.#loadingStarted === 0){
@@ -55,13 +56,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
         this.getTemplateStyle() + this.#loadingIndicatorConfig.generateLoadingIndicatorHtml();
     }
 
-    /**
-     * TODO
-     *
-     * Show loading animation here.
-     * If one exists, set it to show for a minimum of 0.5 seconds.
-     * Add a loading store to the component that runs for 0.5 seconds.
-     */
   }
 
   unlockComponent(dataStore: DataStore) {
@@ -77,10 +71,12 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   protected updateData(storeUpdates: any) {
 
-    if(this.#loadingFromStores.size > 0){
-      console.warn("Component is locked because of loading from stores cannot be updated right now");
-      return;
+    //TODO: Consider solution to multiple renders being attempted at the same time such as blocking concurrent renders.
+    if(this.#componentIsRendering){
+      console.warn(`Attempting to trigger multiple renders at the same time on component ${this.constructor.name}`)
     }
+
+    this.#componentIsRendering = true;
 
     if (!storeUpdates) {
       storeUpdates = this.componentStore;
@@ -95,6 +91,8 @@ export abstract class BaseDynamicComponent extends HTMLElement {
         this.#attachedEventsToShadowRoot = true;
       }
     }
+
+    this.#componentIsRendering = false;
   }
 
   updateFromSubscribedStores() {
@@ -140,23 +138,32 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       this.shadowRoot!.appendChild(template.content.cloneNode(true));
     }
 
+    console.log(this.#loadingStarted);
     if(this.#loadingStarted > 0){
       const current = Date.now();
       const loadTime = current - this.#loadingStarted;
 
-      console.log(`Loading took ${loadTime} milliseconds`);
+      this.#loadingStarted = 0;
       if(this.#loadingIndicatorConfig?.minTimeMs){
         const remainingTime = this.#loadingIndicatorConfig.minTimeMs - loadTime;
+
 
         const self = this;
         if(remainingTime > 0){
           setTimeout(()=>{
             // @ts-ignore
             self.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
-            self.#loadingStarted = 0;
           },remainingTime);
+        } else {
+
+          // @ts-ignore
+          this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
         }
+      } else {
+        // @ts-ignore
+        this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
       }
+
     }
     else {
       // @ts-ignore
