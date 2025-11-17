@@ -142,6 +142,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       const current = Date.now();
       const loadTime = current - this.#loadingStarted;
 
+      console.log(`Loaded data for ${this.constructor.name} in ${loadTime} milliseconds`)
       this.#loadingStarted = 0;
       if(this.#loadingIndicatorConfig?.minTimeMs){
         const remainingTime = this.#loadingIndicatorConfig.minTimeMs - loadTime;

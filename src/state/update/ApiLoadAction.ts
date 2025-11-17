@@ -103,6 +103,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
     }
 
     try {
+
       //The replace call is a workaround for an issue with url strings containing double quotes"
       const response = await fetch(queryConfig.url.replace(/"/g, ""), {
         method: queryConfig.method ?? ApiActionType.GET,
