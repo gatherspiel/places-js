@@ -4,24 +4,29 @@ import {freezeState} from "./state/StateUtils";
 export abstract class BaseDynamicComponent extends HTMLElement {
 
   #attachedEventsToShadowRoot:boolean = false;
-  #subscribedStores: DataStoreSubscription[];
+  #subscribedStores: DataStoreSubscription[] = [];
+  #componentLocked = true;
 
   componentStore: any = {};
 
   protected constructor(dataStoreSubscriptions: DataStoreSubscription[] = []) {
     super();
 
-    this.#subscribedStores = dataStoreSubscriptions;
-
     const self = this;
 
+    this.#subscribedStores = dataStoreSubscriptions
     dataStoreSubscriptions.forEach((subscription: DataStoreSubscription) => {
       subscription.dataStore.subscribeComponent(self)
     });
+    this.updateFromSubscribedStores();
+  }
 
-    if(this.allSubscribedStoresHaveData()){
-      this.updateFromSubscribedStores();
-    }
+  lockComponent(){
+    this.#componentLocked = false;
+  }
+
+  unlockComponent() {
+    this.#componentLocked = true;
   }
 
   disconnectedCallback(){
@@ -32,6 +37,11 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   }
 
   protected updateData(storeUpdates: any) {
+
+    if(!this.#componentLocked){
+      console.warn("Component is locked and cannot be updated right now");
+      return;
+    }
 
     if (!storeUpdates) {
       storeUpdates = this.componentStore;
@@ -48,40 +58,49 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     }
   }
 
-  allSubscribedStoresHaveData(){
-    for(let i=0; i<this.#subscribedStores.length; i++){
-      if(!this.#subscribedStores[i].dataStore.hasStoreData()) {
-        return false;
-      }
-    }
-    return true;
-
-  }
-
   updateFromSubscribedStores() {
+
+    let allSubscribedStoresHaveData = true;
+    for(let i=0; i<this.#subscribedStores.length; i++){
+      allSubscribedStoresHaveData = allSubscribedStoresHaveData &&
+        (this.#subscribedStores[i].dataStore.isWaitingForData())
+    }
+
     const self = this;
-    let dataToUpdate: any = {}
-    this.#subscribedStores?.forEach((item:DataStoreSubscription)=> {
+    if(allSubscribedStoresHaveData){
 
-      let storeData = item.dataStore.getStoreData();
-      if(item.componentReducer){
-        storeData = item.componentReducer(storeData);
-      }
+      let dataToUpdate: any = {}
+      this.#subscribedStores?.forEach((item:DataStoreSubscription)=> {
 
-      if(item.fieldName) {
-        dataToUpdate[item.fieldName] = storeData;
-      } else {
-        dataToUpdate = storeData;
-        if(self.#subscribedStores?.length > 1){
-          throw new Error(`Component ${this.constructor.name} is subscribed to multiple data stores. 
-            Each one must be associated with a specified field name`)
+        let storeData = item.dataStore.getStoreData();
+        if(item.componentReducer){
+          storeData = item.componentReducer(storeData);
         }
-      }
-    })
 
-    this.updateData(
-      dataToUpdate,
-    );
+        if(item.fieldName) {
+          dataToUpdate[item.fieldName] = storeData;
+        } else {
+          dataToUpdate = storeData;
+          if(self.#subscribedStores?.length > 1){
+            throw new Error(`Component ${this.constructor.name} is subscribed to multiple data stores. 
+              Each one must be associated with a specified field name`)
+          }
+        }
+      })
+
+      this.updateData(
+        dataToUpdate,
+      );
+    } else {
+      console.log("Waiting");
+      /**
+       * TODO
+       *
+       * Show loading animation here.
+       * If one exists, set it to show for a minimum of 0.5 seconds.
+       * Add a loading store to the component that runs for 0.5 seconds.
+       */
+    }
   }
 
   #generateAndSaveHTML(data: any) {
@@ -93,6 +112,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
     // @ts-ignore
     this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
+
   }
 
   /*

@@ -6,7 +6,7 @@ export class DataStore {
 
   static #storeCount = 0;
 
-  #isFetchRequestActive:boolean = false;
+  #isLoading:boolean = false;
   #storeData:any = null
   #componentSubscriptions:BaseDynamicComponent[];
 
@@ -32,10 +32,10 @@ export class DataStore {
   }
 
   /**
-   * @returns {boolean} false if the data in the store is null or undefined, true otherwise.
+   * @returns {boolean} false if the data in the store is null or undefined and is not in a loading state true otherwise.
    */
-  hasStoreData():boolean {
-    return this.#storeData !== null && this.#storeData !== undefined;
+  isWaitingForData():boolean {
+    return this.#storeData !== null && this.#storeData !== undefined  && !this.isWaitingForData();
   }
 
   /**
@@ -59,23 +59,28 @@ export class DataStore {
     const self = this;
 
     // Do not make a data request if there is an active one in progress. It will push data to subscribed components.
-    if(!this.#isFetchRequestActive) {
-      this.#isFetchRequestActive = true;
+    if(!this.#isLoading) {
+      this.#isLoading = true;
+
+      //Disable rendering of component while data is being retrieved
+      self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
+        component.lockComponent();
+      })
 
       this.#loadAction.fetch(params, self.#requestStoreId).then((response: any) => {
 
-        self.#isFetchRequestActive = false;
+        self.#isLoading = false;
         self.#storeData = response;
+
+        self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
+          component.updateFromSubscribedStores();
+          component.unlockComponent();
+        })
 
         if(dataStore){
           dataStore.updateStoreData(response);
         }
 
-        self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
-          if(component.allSubscribedStoresHaveData()){
-            component.updateFromSubscribedStores();
-          }
-        })
       });
     }
   }
@@ -101,7 +106,7 @@ export class DataStore {
     }
     this.#componentSubscriptions.push(component);
 
-    if(!this.hasStoreData()){
+    if(!this.isWaitingForData()){
       this.fetchData();
     }
   }
