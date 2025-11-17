@@ -1,18 +1,26 @@
 import {DataStoreSubscription} from "./state/update/types/DataStoreSubscription";
 import {freezeState} from "./state/StateUtils";
+import {LoadingIndicatorConfig} from "./state/update/types/LoadingIndicatorConfig";
+import {DataStore} from "./state/update/DataStore";
 
 export abstract class BaseDynamicComponent extends HTMLElement {
 
   #attachedEventsToShadowRoot:boolean = false;
-  #subscribedStores: DataStoreSubscription[] = [];
-  #componentLocked = true;
+
+  #loadingFromStores = new Set();
+  #loadingStarted:number = 0;
 
   componentStore: any = {};
 
-  protected constructor(dataStoreSubscriptions: DataStoreSubscription[] = []) {
+  readonly #loadingIndicatorConfig: LoadingIndicatorConfig;
+  readonly #subscribedStores: DataStoreSubscription[] = [];
+
+  protected constructor(dataStoreSubscriptions: DataStoreSubscription[] = [], loadingIndicatorConfig:LoadingIndicatorConfig) {
     super();
 
     const self = this;
+
+    this.#loadingIndicatorConfig = loadingIndicatorConfig;
 
     this.#subscribedStores = dataStoreSubscriptions
     dataStoreSubscriptions.forEach((subscription: DataStoreSubscription) => {
@@ -21,12 +29,41 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     this.updateFromSubscribedStores();
   }
 
-  lockComponent(){
-    this.#componentLocked = false;
+  lockComponent(dataStore:DataStore){
+
+    if(!this.#loadingFromStores.has(dataStore)){
+      this.#loadingFromStores.add(dataStore);
+    } else {
+      console.warn("Attempting to lock component multiple times");
+    }
+
+    if(this.#loadingStarted === 0){
+      this.#loadingStarted = Date.now();
+    }
+
+    if(this.#loadingIndicatorConfig){
+
+      if (this.shadowRoot === null) {
+        this.attachShadow({ mode: "open" });
+        const template = document.createElement("template");
+        this.shadowRoot!.appendChild(template.content.cloneNode(true));
+      }
+      // @ts-ignore
+      this.shadowRoot.innerHTML =
+        this.getTemplateStyle() + this.#loadingIndicatorConfig.generateLoadingIndicatorHtml();
+    }
+
+    /**
+     * TODO
+     *
+     * Show loading animation here.
+     * If one exists, set it to show for a minimum of 0.5 seconds.
+     * Add a loading store to the component that runs for 0.5 seconds.
+     */
   }
 
-  unlockComponent() {
-    this.#componentLocked = true;
+  unlockComponent(dataStore: DataStore) {
+    this.#loadingFromStores.delete(dataStore);
   }
 
   disconnectedCallback(){
@@ -38,8 +75,8 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   protected updateData(storeUpdates: any) {
 
-    if(!this.#componentLocked){
-      console.warn("Component is locked and cannot be updated right now");
+    if(this.#loadingFromStores.size > 0){
+      console.warn("Component is locked because of loading from stores cannot be updated right now");
       return;
     }
 
@@ -91,15 +128,6 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       this.updateData(
         dataToUpdate,
       );
-    } else {
-      console.log("Waiting");
-      /**
-       * TODO
-       *
-       * Show loading animation here.
-       * If one exists, set it to show for a minimum of 0.5 seconds.
-       * Add a loading store to the component that runs for 0.5 seconds.
-       */
     }
   }
 
@@ -110,10 +138,30 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       this.shadowRoot!.appendChild(template.content.cloneNode(true));
     }
 
-    // @ts-ignore
-    this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
+    if(this.#loadingStarted > 0){
+      const current = Date.now();
+      const loadTime = current - this.#loadingStarted;
 
+      console.log(`Loading took ${loadTime} milliseconds`);
+      if(this.#loadingIndicatorConfig?.minTimeMs){
+        const remainingTime = this.#loadingIndicatorConfig.minTimeMs - loadTime;
+
+        const self = this;
+        if(remainingTime > 0){
+          setTimeout(()=>{
+            // @ts-ignore
+            self.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
+            self.#loadingStarted = 0;
+          },remainingTime);
+        }
+      }
+    }
+    else {
+      // @ts-ignore
+      this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
+    }
   }
+
 
   /*
     Override this method to attach event handlers to the component shadow root.

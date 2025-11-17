@@ -64,7 +64,7 @@ export class DataStore {
 
       //Disable rendering of component while data is being retrieved
       self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
-        component.lockComponent();
+        component.lockComponent(self);
       })
 
       this.#loadAction.fetch(params, self.#requestStoreId).then((response: any) => {
@@ -74,7 +74,7 @@ export class DataStore {
 
         self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
           component.updateFromSubscribedStores();
-          component.unlockComponent();
+          component.unlockComponent(self);
         })
 
         if(dataStore){
