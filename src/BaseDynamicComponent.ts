@@ -12,15 +12,17 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   componentStore: any = {};
 
-  readonly #loadingIndicatorConfig: LoadingIndicatorConfig;
+  readonly #loadingIndicatorConfig?: LoadingIndicatorConfig;
   readonly #subscribedStores: DataStoreSubscription[] = [];
 
-  protected constructor(dataStoreSubscriptions: DataStoreSubscription[] = [], loadingIndicatorConfig:LoadingIndicatorConfig) {
+  protected constructor(dataStoreSubscriptions: DataStoreSubscription[] = [], loadingIndicatorConfig?:LoadingIndicatorConfig) {
     super();
 
     const self = this;
 
-    this.#loadingIndicatorConfig = loadingIndicatorConfig;
+    if(loadingIndicatorConfig){
+      this.#loadingIndicatorConfig = loadingIndicatorConfig;
+    }
 
     this.#subscribedStores = dataStoreSubscriptions
     dataStoreSubscriptions.forEach((subscription: DataStoreSubscription) => {
