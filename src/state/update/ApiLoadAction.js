@@ -21,23 +21,18 @@ export class ApiLoadAction extends DataStoreLoadAction {
     this.#getRequestConfig = getRequestConfig;
   }
 
+  getRequestConfig(params){
+    return this.#getRequestConfig(params);
+  }
   /**
    * @param params API request parameters
    * @param cacheKey
+   * @param requestKey
    */
-  async fetch(params, cacheKey){
+  async fetch(params, cacheKey, requestKey){
 
     const queryConfig = this.#getRequestConfig(params);
 
-    let requestKey = ''
-    if(cacheKey && cacheKey.length > 0){
-      requestKey = `${queryConfig.method ?? ''}_${queryConfig.url}_${JSON.stringify(queryConfig.body) ?? ''}`;
-
-      const cachedResponse = getItemFromSessionStorage(cacheKey, requestKey);
-      if(cachedResponse){
-        return cachedResponse;
-      }
-    }
 
     if(!queryConfig.headers){
       queryConfig.headers = {};

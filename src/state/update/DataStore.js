@@ -1,5 +1,6 @@
 import { DataStoreLoadAction } from "./DataStoreLoadAction";
 import {freezeState} from "../StateUtils";
+import {getItemFromSessionStorage} from "../../utils/SessionStorageUtils.js";
 
 export class DataStore {
 
@@ -65,22 +66,41 @@ export class DataStore {
     if(!this.#isLoading) {
       this.#isLoading = true;
 
-      //Disable rendering of component while data is being retrieved
-      for(let i =0;i < self.#componentSubscriptions.length; i++){
-        self.#componentSubscriptions[i].lockComponent(self);
+      const requestConfig = this.#loadAction.getRequestConfig ? this.#loadAction.getRequestConfig(params) : {};
+
+      //Retrieve cached response if one exists.
+
+      let response = null;
+      let requestKey = null;
+      if(self.#requestStoreId || self.#requestStoreId.length > 0){
+        requestKey = `${requestConfig.method ?? ''}_${requestConfig.url}_${JSON.stringify(requestConfig.body) ?? ''}`;
+        response = getItemFromSessionStorage(this.#requestStoreId, requestKey);
       }
 
-      if(dataStore){
-        const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
-        for(let i =0;i < dataStoreSubscribedComponents.length; i++){
-          dataStoreSubscribedComponents[i].lockComponent(dataStore);
+      //A cached response does not exist.
+      if(response === null) {
+        //Disable rendering of component while data is being retrieved
+        for (let i = 0; i < self.#componentSubscriptions.length; i++) {
+          self.#componentSubscriptions[i].lockComponent(self);
         }
+
+        if (dataStore) {
+          const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
+          for (let i = 0; i < dataStoreSubscribedComponents.length; i++) {
+            dataStoreSubscribedComponents[i].lockComponent(dataStore);
+          }
+        }
+
+        response = await this.#loadAction.fetch(params, self.#requestStoreId,requestKey)
+        self.#storeData = response;
+
+        self.#isLoading = false;
+
+      } else {
+        self.#storeData = response;
+        self.#isLoading = false;
+
       }
-
-     const response = await this.#loadAction.fetch(params, self.#requestStoreId)
-
-      self.#isLoading = false;
-      self.#storeData = response;
 
       for(let i=0; i< self.#componentSubscriptions.length;i++){
         self.#componentSubscriptions[i].unlockComponent(self);
