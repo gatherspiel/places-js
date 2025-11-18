@@ -1,4 +1,4 @@
-export abstract class BaseTemplateComponent extends HTMLElement {
+export class BaseTemplateComponent extends HTMLElement {
   connectedCallback() {
     this.attachShadow({ mode: "open" });
 
@@ -10,7 +10,7 @@ export abstract class BaseTemplateComponent extends HTMLElement {
     const templateStyle = this.getTemplateStyle();
     const template = document.createElement("template");
     template.innerHTML = templateStyle + `<div></div>`;
-    this.shadowRoot!.appendChild(template.content.cloneNode(true));
+    this.shadowRoot.appendChild(template.content.cloneNode(true));
 
     const div = this.shadowRoot?.querySelector("div");
     if (!div) {
@@ -24,9 +24,4 @@ export abstract class BaseTemplateComponent extends HTMLElement {
     }
   }
 
-  attachEventHandlersToDom?(shadowRoot:ShadowRoot):any
-
-  abstract getTemplateStyle(): string;
-
-  abstract render(): string;
 }

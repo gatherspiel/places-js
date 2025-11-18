@@ -1,19 +1,18 @@
 import { DataStoreLoadAction } from "./DataStoreLoadAction";
-import type {BaseDynamicComponent} from "../../BaseDynamicComponent";
 import {freezeState} from "../StateUtils";
 
 export class DataStore {
 
   static #storeCount = 0;
 
-  #isLoading:boolean = false;
-  #storeData:any = null
-  #componentSubscriptions:BaseDynamicComponent[];
+  #isLoading = false;
+  #storeData = null;
+  #componentSubscriptions = [];
 
-  readonly #loadAction: DataStoreLoadAction;
-  readonly #requestStoreId?: string;
+  #loadAction;
+  #requestStoreId;
 
-  constructor(loadAction: DataStoreLoadAction) {
+  constructor(loadAction) {
     this.#loadAction = loadAction;
     this.#componentSubscriptions = [];
 
@@ -27,14 +26,14 @@ export class DataStore {
    * Returns data from the store.
    * @returns A JSON object representing an immutable copy of store data.
    */
-  getStoreData():any {
+  getStoreData() {
     return this.#storeData;
   }
 
   /**
    * @returns {boolean} false if the data in the store is null or undefined and is not in a loading state true otherwise.
    */
-  isWaitingForData():boolean {
+  isWaitingForData() {
     return this.#storeData !== null && this.#storeData !== undefined  && !this.#isLoading;
   }
 
@@ -42,23 +41,23 @@ export class DataStore {
    * Update data in the store and trigger a render of components subscribed to the store.
    * @param storeUpdates Updated store data. Fields not specified in storeData will not be updated.
    */
-  updateStoreData(storeUpdates:any){
+  updateStoreData(storeUpdates){
     this.#storeData = {...this.#storeData,...freezeState(storeUpdates)};
     for(let i=0; i< this.#componentSubscriptions.length; i++){
       this.#componentSubscriptions[i].updateFromSubscribedStores();
     }
   }
 
-  protected getSubscribedComponents(){
+  getSubscribedComponents(){
     return this.#componentSubscriptions;
   }
 
   /**
    * Retrieves data from an external source.
    * @param params Parameters for the request.
-   * @param dataStore {DataStore}: Optional data store that will be subscribed to updates from this store.
+   * @param dataStore Optional data store that will be subscribed to updates from this store.
    */
-  async fetchData(params:any = {}, dataStore?:DataStore){
+  async fetchData(params = {}, dataStore){
 
     const self = this;
 
@@ -89,6 +88,10 @@ export class DataStore {
       }
 
       if(dataStore){
+        const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
+        for(let i =0;i < dataStoreSubscribedComponents.length; i++){
+          dataStoreSubscribedComponents[i].unlockComponent(dataStore);
+        }
         dataStore.updateStoreData(response);
       }
 
@@ -96,7 +99,7 @@ export class DataStore {
     }
   }
 
-  unsubscribeComponent(component:BaseDynamicComponent){
+  unsubscribeComponent(component){
     const idx = this.#componentSubscriptions.indexOf(component);
     if(idx === -1){
       console.warn(`Attempt to unsubscribe ${component.constructor.name} from store it is not subscribed to`)
@@ -105,7 +108,7 @@ export class DataStore {
     this.#componentSubscriptions.splice(idx, 1);
   }
 
-  subscribeComponent(component:BaseDynamicComponent){
+  subscribeComponent(component){
 
     let i = 0;
     while(i<this.#componentSubscriptions.length){

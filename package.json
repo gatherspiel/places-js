@@ -13,12 +13,11 @@
   "main": "dist/places-js.umd.js",
   "module": "dist/places-js.esm.js",
   "unpkg": "dist/places-js.umd.min.js",
-  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c rollup.config.js --format esm --sourcemap true -o dist/places-js.esm.js",
+    "build": "rollup -c rollup.config.js",
     "updateLocal": "npm run build && yalc publish --push --replace"
   },
   "repository": {
@@ -26,9 +25,6 @@
     "url": "git+https://github.com/gatherspiel/places-js.git"
   },
   "devDependencies": {
-    "rollup": "^4.46.3",
-    "rollup-plugin-typescript": "^1.0.1",
-    "rollup-plugin-typescript2": "^0.36.0",
-    "typescript": "^5.9.2"
+    "rollup": "^4.46.3"
   }
 }

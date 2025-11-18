@@ -1,22 +1,20 @@
-import {DataStoreSubscription} from "./state/update/types/DataStoreSubscription";
-import {freezeState} from "./state/StateUtils";
-import {LoadingIndicatorConfig} from "./state/update/types/LoadingIndicatorConfig";
-import {DataStore} from "./state/update/DataStore";
+import {freezeState} from "./state/StateUtils.js";
+import {DataStore} from "./state/update/DataStore.js";
 
-export abstract class BaseDynamicComponent extends HTMLElement {
+export class BaseDynamicComponent extends HTMLElement {
 
-  #attachedEventsToShadowRoot:boolean = false;
+  #attachedEventsToShadowRoot = false;
 
-  #componentIsRendering:boolean = false;
+  #componentIsRendering = false;
   #loadingFromStores = new Set();
-  #loadingStarted:number = 0;
+  #loadingStarted = 0;
 
-  componentStore: any = {};
+  componentStore = {};
 
-  readonly #loadingIndicatorConfig?: LoadingIndicatorConfig;
-  readonly #subscribedStores: DataStoreSubscription[] = [];
+  #loadingIndicatorConfig;
+  #subscribedStores = [];
 
-  protected constructor(dataStoreSubscriptions: DataStoreSubscription[] = [], loadingIndicatorConfig?:LoadingIndicatorConfig) {
+  constructor(dataStoreSubscriptions = [], loadingIndicatorConfig) {
     super();
 
     if(loadingIndicatorConfig){
@@ -31,7 +29,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     this.updateFromSubscribedStores();
   }
 
-  lockComponent(dataStore:DataStore){
+  lockComponent(dataStore){
 
     if(!this.#loadingFromStores.has(dataStore)){
       this.#loadingFromStores.add(dataStore);
@@ -48,7 +46,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
       if (this.shadowRoot === null) {
         this.attachShadow({ mode: "open" });
         const template = document.createElement("template");
-        this.shadowRoot!.appendChild(template.content.cloneNode(true));
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
       }
       // @ts-ignore
       this.shadowRoot.innerHTML =
@@ -57,7 +55,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   }
 
-  unlockComponent(dataStore: DataStore) {
+  unlockComponent(dataStore) {
     this.#loadingFromStores.delete(dataStore);
   }
 
@@ -68,7 +66,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
   }
 
-  protected updateData(storeUpdates: any) {
+  updateData(storeUpdates) {
 
     if(this.#componentIsRendering){
       console.warn(`Attempting to trigger multiple renders at the same time on component ${this.constructor.name}`)
@@ -103,7 +101,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
 
     if(allSubscribedStoresHaveData){
 
-      let dataToUpdate: any = {}
+      let dataToUpdate = {}
       for(let i =0;i<this.#subscribedStores.length;i++){
 
         const item = this.#subscribedStores[i];
@@ -129,11 +127,11 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     }
   }
 
-  #generateAndSaveHTML(data: any) {
+  #generateAndSaveHTML(data) {
     if (this.shadowRoot === null) {
       this.attachShadow({ mode: "open" });
       const template = document.createElement("template");
-      this.shadowRoot!.appendChild(template.content.cloneNode(true));
+      this.shadowRoot.appendChild(template.content.cloneNode(true));
     }
 
     if(this.#loadingStarted > 0){
@@ -170,15 +168,14 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   }
 
 
-  /*
-    Override this method to attach event handlers to the component shadow root.
-   */
-  protected attachHandlersToShadowRoot?(shadowRoot:ShadowRoot):any
-
-  protected abstract render(data: any): string;
+  render(data){
+    throw new Error(`render(data) function for ${this.constructor.name} must be defined` )
+  }
 
   /*
   - Returns CSS styles specific to the component. The string should be in the format <style> ${CSS styles} </style>
   */
-  protected abstract getTemplateStyle(): string;
+  getTemplateStyle(){
+    throw new Error(`getTemplateStyle function for ${this.constructor.name} must be defined` )
+  }
 }

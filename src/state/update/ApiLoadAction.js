@@ -1,24 +1,19 @@
 import { DataStoreLoadAction } from "./DataStoreLoadAction";
 
-import type { ApiRequestConfig } from "./types/ApiRequestConfig";
-import { ApiActionType } from "./types/ApiActionType";
 import {
   clearSessionStorage,
   getItemFromSessionStorage,
   updateSessionStorage
 } from "../../utils/SessionStorageUtils";
 import {getLocalStorageDataIfPresent} from "../../utils/LocalStorageUtils";
-import {ApiResponseData} from "./types/ApiResponseData";
 
 /**
  * Class to define a data store load action through an API call.
  */
 export class ApiLoadAction extends DataStoreLoadAction {
 
-  readonly #getRequestConfig: (a: any) => ApiRequestConfig;
-
   constructor(
-    getRequestConfig: (a: any) => ApiRequestConfig,
+    getRequestConfig
   ) {
     super();
     this.#getRequestConfig = getRequestConfig;
@@ -28,9 +23,9 @@ export class ApiLoadAction extends DataStoreLoadAction {
    * @param params API request parameters
    * @param cacheKey
    */
-  async fetch(params: ApiRequestConfig, cacheKey?: string): Promise<ApiResponseData> {
+  async fetch(params, cacheKey){
 
-    const queryConfig: ApiRequestConfig = this.#getRequestConfig(params);
+    const queryConfig = this.#getRequestConfig(params);
 
     let requestKey = ''
     if(cacheKey && cacheKey.length > 0){
@@ -59,7 +54,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
     return response;
   }
 
-  static async #getErrorData(response:any, url:string): Promise<ApiResponseData> {
+  static async #getErrorData(response, url) {
 
     let message;
 
@@ -88,7 +83,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
    *
    * @param {ApiRequestConfig} queryConfig Configuration of the API request.
    */
-  static async getResponseData(queryConfig: ApiRequestConfig): Promise<ApiResponseData>{
+  static async getResponseData(queryConfig){
 
     const authData = getLocalStorageDataIfPresent("authToken")?.access_token
 
@@ -127,7 +122,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
       }
       return { status: 200 };
 
-    } catch (e: any) {
+    } catch (e) {
       return {errorMessage:e.message};
     }
   }

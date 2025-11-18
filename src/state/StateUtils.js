@@ -3,7 +3,7 @@
  * @param state State that should be frozen.
  * @private
  */
-export function freezeState(state:any){
+export function freezeState(state){
   if(!state || JSON.stringify(state)==='{}'){
     return {};
   }

@@ -1,11 +1,11 @@
 export function clearSessionStorage(){
   for(let i = 0; i< sessionStorage.length; i++){
-    const key = sessionStorage.key(i) as string;
+    const key = sessionStorage.key(i);
     sessionStorage.setItem(key, JSON.stringify({}))
   }
 }
 
-export function getItemFromSessionStorage(requestStoreName:string, requestData: any){
+export function getItemFromSessionStorage(requestStoreName, requestData){
 
   const dataStr = sessionStorage.getItem(requestStoreName);
   if(!dataStr){
@@ -20,7 +20,7 @@ export function getItemFromSessionStorage(requestStoreName:string, requestData: 
   return null;
 }
 
-export function updateSessionStorage(requestStoreName: string, requestData:any, response:any){
+export function updateSessionStorage(requestStoreName, requestData, response){
 
   const dataStr = sessionStorage.getItem(requestStoreName);
   if(!dataStr){

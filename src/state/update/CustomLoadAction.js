@@ -7,19 +7,17 @@ import { DataStoreLoadAction } from "./DataStoreLoadAction";
  */
 export class CustomLoadAction extends DataStoreLoadAction {
 
-  readonly #loadFunction: (params: any) => any;
 
   constructor(
-    loadFunction: (params: any) => any,
+    loadFunction
   ) {
     super();
     this.#loadFunction = loadFunction;
   }
 
-  async fetch(params: any): Promise<any> {
-    const externalRequest: CustomLoadAction = this;
+  async fetch(params) {
 
-    return await externalRequest.#loadFunction(
+    return await this.#loadFunction(
       params,
     );
   }
