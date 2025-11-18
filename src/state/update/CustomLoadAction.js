@@ -7,6 +7,7 @@ import { DataStoreLoadAction } from "./DataStoreLoadAction";
  */
 export class CustomLoadAction extends DataStoreLoadAction {
 
+  #loadFunction;
 
   constructor(
     loadFunction

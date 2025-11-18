@@ -2,6 +2,6 @@
 export default {
   input: "./src/index.js",
   output: {
-    file: 'bundle.js',
+    file: './dist/places-js.esm.js',
   }
 };

@@ -531,6 +531,7 @@ class ApiLoadAction extends DataStoreLoadAction {
  */
 class CustomLoadAction extends DataStoreLoadAction {
 
+  #loadFunction;
 
   constructor(
     loadFunction
