@@ -19,16 +19,15 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   protected constructor(dataStoreSubscriptions: DataStoreSubscription[] = [], loadingIndicatorConfig?:LoadingIndicatorConfig) {
     super();
 
-    const self = this;
-
     if(loadingIndicatorConfig){
       this.#loadingIndicatorConfig = loadingIndicatorConfig;
     }
 
     this.#subscribedStores = dataStoreSubscriptions
-    dataStoreSubscriptions.forEach((subscription: DataStoreSubscription) => {
-      subscription.dataStore.subscribeComponent(self)
-    });
+    for(let i=0;i <this.#subscribedStores.length;i++){
+      this.#subscribedStores[i].dataStore.subscribeComponent(this);
+    }
+
     this.updateFromSubscribedStores();
   }
 
@@ -63,15 +62,14 @@ export abstract class BaseDynamicComponent extends HTMLElement {
   }
 
   disconnectedCallback(){
-    const self = this;
-    self.#subscribedStores.forEach((subscription:DataStoreSubscription)=>{
-      subscription.dataStore.unsubscribeComponent(self);
-    })
+    for(let i=0;i<this.#subscribedStores.length;i++){
+      this.#subscribedStores[i].dataStore.unsubscribeComponent(this);
+    }
+
   }
 
   protected updateData(storeUpdates: any) {
 
-    //TODO: Consider solution to multiple renders being attempted at the same time such as blocking concurrent renders.
     if(this.#componentIsRendering){
       console.warn(`Attempting to trigger multiple renders at the same time on component ${this.constructor.name}`)
     }
@@ -79,7 +77,7 @@ export abstract class BaseDynamicComponent extends HTMLElement {
     this.#componentIsRendering = true;
 
     if (!storeUpdates) {
-      storeUpdates = this.componentStore;
+      return
     }
 
     this.componentStore = {...this.componentStore,...freezeState(storeUpdates)};
@@ -103,12 +101,12 @@ export abstract class BaseDynamicComponent extends HTMLElement {
         (this.#subscribedStores[i].dataStore.isWaitingForData())
     }
 
-    const self = this;
     if(allSubscribedStoresHaveData){
 
       let dataToUpdate: any = {}
-      this.#subscribedStores?.forEach((item:DataStoreSubscription)=> {
+      for(let i =0;i<this.#subscribedStores.length;i++){
 
+        const item = this.#subscribedStores[i];
         let storeData = item.dataStore.getStoreData();
         if(item.componentReducer){
           storeData = item.componentReducer(storeData);
@@ -118,12 +116,12 @@ export abstract class BaseDynamicComponent extends HTMLElement {
           dataToUpdate[item.fieldName] = storeData;
         } else {
           dataToUpdate = storeData;
-          if(self.#subscribedStores?.length > 1){
+          if(this.#subscribedStores?.length > 1){
             throw new Error(`Component ${this.constructor.name} is subscribed to multiple data stores. 
               Each one must be associated with a specified field name`)
           }
         }
-      })
+      }
 
       this.updateData(
         dataToUpdate,

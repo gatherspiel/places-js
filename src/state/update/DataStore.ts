@@ -44,9 +44,9 @@ export class DataStore {
    */
   updateStoreData(storeUpdates:any){
     this.#storeData = {...this.#storeData,...freezeState(storeUpdates)};
-    this.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
-      component.updateFromSubscribedStores();
-    })
+    for(let i=0; i< this.#componentSubscriptions.length; i++){
+      this.#componentSubscriptions[i].updateFromSubscribedStores();
+    }
   }
 
   protected getSubscribedComponents(){
@@ -67,13 +67,15 @@ export class DataStore {
       this.#isLoading = true;
 
       //Disable rendering of component while data is being retrieved
-      self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
-        component.lockComponent(self);
-      })
+      for(let i =0;i < self.#componentSubscriptions.length; i++){
+        self.#componentSubscriptions[i].lockComponent(self);
+      }
+
       if(dataStore){
-        dataStore.getSubscribedComponents().forEach((component:BaseDynamicComponent)=>{
-          component.lockComponent(self);
-        })
+        const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
+        for(let i =0;i < dataStoreSubscribedComponents.length; i++){
+          dataStoreSubscribedComponents[i].lockComponent(dataStore);
+        }
       }
 
      const response = await this.#loadAction.fetch(params, self.#requestStoreId)
@@ -81,10 +83,10 @@ export class DataStore {
       self.#isLoading = false;
       self.#storeData = response;
 
-      self.#componentSubscriptions.forEach((component:BaseDynamicComponent)=>{
-        component.unlockComponent(self);
-        component.updateFromSubscribedStores();
-      })
+      for(let i=0; i< self.#componentSubscriptions.length;i++){
+        self.#componentSubscriptions[i].unlockComponent(self);
+        self.#componentSubscriptions[i].updateFromSubscribedStores();
+      }
 
       if(dataStore){
         dataStore.updateStoreData(response);
