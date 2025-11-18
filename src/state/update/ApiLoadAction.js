@@ -6,12 +6,14 @@ import {
   updateSessionStorage
 } from "../../utils/SessionStorageUtils";
 import {getLocalStorageDataIfPresent} from "../../utils/LocalStorageUtils";
+import {ApiActionType} from "./ApiActionType.js";
 
 /**
  * Class to define a data store load action through an API call.
  */
 export class ApiLoadAction extends DataStoreLoadAction {
 
+  #getRequestConfig;
   constructor(
     getRequestConfig
   ) {
