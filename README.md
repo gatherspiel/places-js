@@ -4,4 +4,4 @@ support shadow dom to encapsulate styles and deter bot scraping.
 
 Documentation is at [https://createthirdplaces.com/placesjs.html](https://createthirdplaces.com/placesjs.html)
 
-See the repo [here](https://github.com/gatherspiel/DMVBoardGames/tree/main/src/ui) for an example using PlacesJS
+See the repo [here](https://github.com/gatherspiel/DMVBoardGames/tree/main/src/ui) for an example using PlacesJS.
