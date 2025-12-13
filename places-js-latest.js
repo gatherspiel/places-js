@@ -127,7 +127,6 @@ class DataStore {
       let requestKey = null;
       if(self.#requestStoreId || self.#requestStoreId.length > 0){
         requestKey = `${requestConfig.method ?? ''}_${requestConfig.url}_${JSON.stringify(requestConfig.body) ?? ''}`;
-        console.log(requestKey);
         response = getItemFromSessionStorage(this.#requestStoreId, requestKey);
       }
 
@@ -221,17 +220,11 @@ class BaseDynamicComponent extends HTMLElement {
     }
 
     this.#subscribedStores = dataStoreSubscriptions;
-
-    let allStoresHaveData = true;
     for(let i=0;i <this.#subscribedStores.length;i++){
-      allStoresHaveData = allStoresHaveData && this.#subscribedStores[i].dataStore.isWaitingForData();
       this.#subscribedStores[i].dataStore.subscribeComponent(this);
     }
 
-
-    if(allStoresHaveData){
-      this.updateFromSubscribedStores(allStoresHaveData);
-    }
+    this.updateFromSubscribedStores();
   }
 
   lockComponent(dataStore){
@@ -277,12 +270,11 @@ class BaseDynamicComponent extends HTMLElement {
       console.warn(`Attempting to trigger multiple renders at the same time on component ${this.constructor.name}`);
     }
 
-    this.#componentIsRendering = true;
-
     if (!storeUpdates) {
-      return
+      return;
     }
 
+    this.#componentIsRendering = true;
     this.componentStore = {...this.componentStore,...freezeState(storeUpdates)};
     this.#generateAndSaveHTML(this.componentStore);
 
@@ -299,12 +291,10 @@ class BaseDynamicComponent extends HTMLElement {
   updateFromSubscribedStores() {
 
     let allSubscribedStoresHaveData = true;
-
     for(let i=0; i<this.#subscribedStores.length; i++){
       allSubscribedStoresHaveData = allSubscribedStoresHaveData &&
         (this.#subscribedStores[i].dataStore.isWaitingForData());
     }
-
 
     if(allSubscribedStoresHaveData){
 
@@ -580,4 +570,4 @@ class CustomLoadAction extends DataStoreLoadAction {
 
 }
 
-export { ApiActionType, ApiLoadAction, BaseDynamicComponent, BaseTemplateComponent, CustomLoadAction, DataStore, DataStoreLoadAction, addLocalStorageData, clearSessionStorage, deleteLocalStoreData, getLocalStorageDataIfPresent };
+export { ApiLoadAction, BaseDynamicComponent, BaseTemplateComponent, CustomLoadAction, DataStore, DataStoreLoadAction, addLocalStorageData, clearSessionStorage, deleteLocalStoreData, getLocalStorageDataIfPresent };
