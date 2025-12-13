@@ -1,7 +1,7 @@
 {
   "name": "@bponnaluri/places-js",
   "version": "0.0.47",
-  "homepage": "https://github.com/gatherspiel/places-js#",
+  "homepage": "https://github.com/createthirdplaces/places-js#",
   "license": "GPL-3.0",
   "description": "Places.js is a lightweight Javascript framework with suupport for state management, asynchronous data fetching with zero dependencies, and shadow DOM",
   "type": "module",
