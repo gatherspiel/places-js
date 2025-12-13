@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gatherspiel/places-js.git"
+    "url": "git+https://github.com/createthirdplaces/places-js.git"
   },
   "devDependencies": {
     "rollup": "^4.46.3"
