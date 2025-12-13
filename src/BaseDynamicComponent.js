@@ -72,12 +72,11 @@ export class BaseDynamicComponent extends HTMLElement {
       console.warn(`Attempting to trigger multiple renders at the same time on component ${this.constructor.name}`)
     }
 
-    this.#componentIsRendering = true;
-
     if (!storeUpdates) {
-      return
+      return;
     }
 
+    this.#componentIsRendering = true;
     this.componentStore = {...this.componentStore,...freezeState(storeUpdates)};
     this.#generateAndSaveHTML(this.componentStore);
 
